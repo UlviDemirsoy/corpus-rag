@@ -1,5 +1,5 @@
 {
-  "source_csv": "C:\\Users\\Ulvi\\Desktop\\playablefactory\\evals\\results\\faithfulness_runs_20260810T144606Z.csv",
+  "source_csv": "evals\\results\\faithfulness_runs.csv",
   "chat_model": "gpt-4o-mini",
   "embedding_model": "text-embedding-3-small",
   "chart": "C:\\Users\\Ulvi\\Desktop\\playablefactory\\evals\\results\\charts\\faithfulness_by_setting.png",

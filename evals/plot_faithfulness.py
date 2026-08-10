@@ -90,9 +90,10 @@ def main() -> int:
             fontweight="bold",
         )
 
-    fig.subplots_adjust(bottom=0.18, top=0.88, left=0.1, right=0.96)
+    ax.tick_params(axis="x", length=0, pad=10)
+    fig.subplots_adjust(bottom=0.22, top=0.86, left=0.1, right=0.96)
     out = CHARTS / "faithfulness_by_setting.png"
-    fig.savefig(out, dpi=140)
+    fig.savefig(out, dpi=140, bbox_inches="tight", pad_inches=0.25)
     plt.close(fig)
 
     summary = {
