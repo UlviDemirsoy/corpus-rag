@@ -1,0 +1,21 @@
+{
+  "name": "rag-case",
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter @rag/api --filter @rag/web dev",
+    "dev:api": "pnpm --filter @rag/api dev",
+    "dev:web": "pnpm --filter @rag/web dev",
+    "build": "pnpm -r build",
+    "db:generate": "pnpm --filter @rag/api db:generate",
+    "db:migrate": "pnpm --filter @rag/api db:migrate",
+    "db:seed": "pnpm --filter @rag/api db:seed",
+    "ingest": "pnpm --filter @rag/api ingest",
+    "ingest:all": "pnpm ingest -- --strategy=fixed && pnpm ingest -- --strategy=recursive && pnpm ingest -- --strategy=sliding",
+    "mcp": "pnpm --filter @rag/api mcp",
+    "docker:up": "docker compose -f docker/docker-compose.yml up -d --build",
+    "docker:down": "docker compose -f docker/docker-compose.yml down",
+    "docker:reset": "docker compose -f docker/docker-compose.yml down -v && docker compose -f docker/docker-compose.yml up -d --build",
+    "docker:logs": "docker compose -f docker/docker-compose.yml logs -f api web"
+  }
+}

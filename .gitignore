@@ -1,0 +1,14 @@
+node_modules
+dist
+.next
+.turbo
+.env
+.env.local
+*.log
+coverage
+.DS_Store
+evals/results/**
+!evals/results/.gitkeep
+!evals/results/faithfulness.json
+apps/api/drizzle/meta
+*.tsbuildinfo
