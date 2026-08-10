@@ -30,6 +30,12 @@ const EnvSchema = z.object({
   EMBEDDING_MODEL: z.string().default("text-embedding-3-small"),
   CHAT_MODEL: z.string().default("gpt-4o-mini"),
   TOP_K: z.coerce.number().int().positive().default(5),
+  /** Dense retrieve this many candidates, then OpenAI-rerank down to TOP_K. */
+  RERANK_ENABLED: boolEnv(true),
+  RERANK_CANDIDATES: z.coerce.number().int().positive().default(20),
+  /** Blend dense + BM25 via s = α·densê + (1−α)·BM25̂ */
+  HYBRID_ENABLED: boolEnv(true),
+  HYBRID_ALPHA: z.coerce.number().min(0).max(1).default(0.5),
   DEMO_USER_PASSWORD: z.string().default("user1234"),
   DEMO_ADMIN_PASSWORD: z.string().default("admin1234"),
   AUTO_INGEST: boolEnv(true),

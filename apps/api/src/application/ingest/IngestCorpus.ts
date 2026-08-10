@@ -45,6 +45,7 @@ export class IngestCorpus {
     private readonly jobs: IngestionJobRepository,
     private readonly vectors: VectorStore,
     private readonly embedder: Embedder,
+    private readonly onIndexChange?: (strategy: ChunkStrategy) => void,
   ) {}
 
   async execute(input: {
@@ -174,6 +175,7 @@ export class IngestCorpus {
         { jobId: job.id, processed, failed, strategy, status: finalStatus },
         "Ingestion finished",
       );
+      this.onIndexChange?.(strategy);
       return updated;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);

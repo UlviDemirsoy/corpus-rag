@@ -1,0 +1,724 @@
+run_id,timestamp,chat_model,embedding_model,top_k,setting,strategy,use_hybrid,hybrid_alpha,use_rerank,question_idx,question,expect_ungrounded,expect_sources,answer,grounded,citations,passage_sources,passage_count,contexts_preview,faithfulness,score_method,latency_ms,response_hybrid,response_hybrid_alpha,response_reranked,trace_id
+20260810T144606Z,2026-08-10T14:46:25.720149+00:00,gpt-4o-mini,text-embedding-3-small,5,dense,recursive,False,,False,1,"What is the maximum file size for an AppLovin playable, and how does it ship?",False,network-specs-applovin.md,"The maximum file size for an AppLovin playable is 5 MB for the final single HTML file, which ships as a self-contained HTML file with all assets inlined (base64) and no external network requests allowed at runtime.",True,[1] network-specs-applovin.md,network-specs-applovin.md | incident-postmortem-2026-03.md | network-specs-unity-meta.md | delivery-reports/2026-04-waffle-rush.md | delivery-reports/2026-02-orbit-golf.md,5,"# Network Specs: AppLovin
+
+AppLovin playables at Lumen ship as a single self-contained HTML file. All assets are inlined (base64) and no external network requests are allowed at runtime.
+
+Hard limits:
+- Maximum file size: 5 MB for the final… || # Postmortem: March 2026 Delivery Incident
+
+In March 2026 (fictional), eleven AppLovin deliveries were rejected in one week for exceeding the 5 MB single-file limit, despite passing the internal verify stage.
+
+Root cause: a lumen-build upda… || # Network Specs: Unity and Meta
+
+Unity playables ship as a ZIP archive with an index.html entry point. The archive limit is 5 MB, and up to 10 MB after unzip. Unity requires the mraid.js reference to stay in the head of the document.
+
+Meta …",1.0,ragas,1348,False,,False,eval-dense
+20260810T144606Z,2026-08-10T14:46:52.180521+00:00,gpt-4o-mini,text-embedding-3-small,5,dense,recursive,False,,False,2,"How do I initialize the current Lumen SDK, and what happened to lumen.track?",False,sdk-notes-v3.md,"To initialize the current Lumen SDK (v3), you need to call `LumenSDK.init(config)` before any game code runs. This initialization returns a promise that resolves when the network wrapper is ready, and you should not start the render loop until it resolves. The old `lumen.track` calls from v2 are no longer recognized in v3 and will fail silently, indicating that they have been deprecated in favor of the new event system using `LumenSDK.event(name, payload)` instead.",True,[1] sdk-notes-v3.md,sdk-notes-v3.md | sdk-notes-v2.md | company-overview.md | changelogs/lumen-build-4.3.md | analytics-events.md,5,"# Lumen SDK v3 (current)
+
+v3 is the current SDK for all new playables, mandatory since January 2026. It supersedes v2 and is not backward compatible.
+
+Initialization: call LumenSDK.init(config) before any game code runs; init returns a prom… || # Lumen SDK v2 (DEPRECATED)
+
+Status: deprecated since January 2026. Do not use for new playables. Kept for maintenance of legacy projects only. See ""Lumen SDK v3"" for current guidance.
+
+In v2, a playable initializes the SDK by calling lumen… || # Lumen Playables: Company Overview
+
+Lumen Playables is a fictional interactive ad studio founded in 2019, headquartered in Lisbon with a remote production team across Europe. The studio builds HTML5 playable ads for mobile game and app cli…",1.0,ragas,9501,False,,False,eval-dense
+20260810T144606Z,2026-08-10T14:47:05.358002+00:00,gpt-4o-mini,text-embedding-3-small,5,dense,recursive,False,,False,3,Why are sound assets built in a separate pass?,False,build-pipeline.md | incident-postmortem-2026-03.md,"Sound assets are built in a separate pass to avoid nondeterministic size spikes that occur when compressing audio together with textures. This separation helps maintain compliance with the AppLovin 5 MB limit, as combining them previously led to size regressions in some builds.",True,[3] build-pipeline.md | [5] incident-postmortem-2026-03.md,guides/asset-naming.md | changelogs/lumen-build-4.1.md | build-pipeline.md | changelogs/lumen-build-4.2.md | incident-postmortem-2026-03.md,5,"# Asset Naming Conventions
+
+All assets follow pod_game_asset_variant, lower snake case: nova_bubblebakery_tile_croissant.
+Textures carry their target compression in the suffix when it deviates from the default profile.
+Audio files live unde… || # lumen-build 4.1 (2026-02-16)
+
+    - Unified compression path for all asset classes to simplify the pipeline. Audio now flows through the shared compressor.
+- Faster incremental bundles. || # Build Pipeline
+
+Lumen builds run through the internal CLI, lumen-build, maintained by the Platform team.
+
+The pipeline has four stages: bundle, compress, inline, verify. The verify stage runs the same checks as network QA bots (size, forb…",1.0,ragas,1990,False,,False,eval-dense
+20260810T144606Z,2026-08-10T14:47:21.542454+00:00,gpt-4o-mini,text-embedding-3-small,5,dense,recursive,False,,False,4,What caused the March 2026 AppLovin rejections and what was fixed?,False,incident-postmortem-2026-03.md,"The March 2026 AppLovin rejections were caused by a lumen-build update that changed the order of the compress and inline stages, resulting in audio being compressed with textures instead of separately. This led to audio-heavy playables exceeding the 5 MB limit on the network side. The fixes included measuring the final inlined artifact during the verify stage, pinning the stage order in CI, and implementing a regression test for the heaviest historical playables on every pipeline change.",True,[1] incident-postmortem-2026-03.md,incident-postmortem-2026-03.md | postmortems/2025-11-analytics-leak.md | network-specs-applovin.md | delivery-reports/2025-12-merge-marina.md | delivery-reports/2025-10-merge-marina.md,5,"# Postmortem: March 2026 Delivery Incident
+
+In March 2026 (fictional), eleven AppLovin deliveries were rejected in one week for exceeding the 5 MB single-file limit, despite passing the internal verify stage.
+
+Root cause: a lumen-build upda… || # Postmortem: November 2025 Analytics Leak
+
+One AppLovin build was rejected for an outbound request. Root cause: a debug flag left enabled made the analytics buffer flush to the staging endpoint at runtime, bypassing the export-time strip.
+… || # Network Specs: AppLovin
+
+AppLovin playables at Lumen ship as a single self-contained HTML file. All assets are inlined (base64) and no external network requests are allowed at runtime.
+
+Hard limits:
+- Maximum file size: 5 MB for the final…",1.0,ragas,2421,False,,False,eval-dense
+20260810T144606Z,2026-08-10T14:47:29.096943+00:00,gpt-4o-mini,text-embedding-3-small,5,dense,recursive,False,,False,5,"Which languages must every playable ship with, and what is the fallback?",False,localization-guide.md,"Every playable ship must include a minimum language set of English, Spanish, Portuguese, German, French, Japanese, and Korean. If language detection fails or the locale is unsupported, English serves as the fallback language.",True,[1] localization-guide.md,localization-guide.md | postmortems/2025-07-localization-regression.md | delivery-reports/2025-07-sky-ferry.md | meeting-notes/2025-07-07-production-sync.md | meeting-notes/2026-04-20-production-sync.md,5,"# Localization Guide
+
+Every Lumen playable ships with a minimum language set: English, Spanish, Portuguese, German, French, Japanese and Korean. Clients can add languages, never remove from the minimum set.
+
+Language is auto-detected from t… || # Postmortem: July 2025 Localization Regression
+
+Three deliveries shipped with missing Korean glyphs after a font subsetting change trimmed characters used only in the fail-state copy. Internal QA missed it because the checklist glyph check… || # Delivery Report: Sky Ferry, 2025-07
+
+Client: Pocket Comet. Target network this cycle: Unity. Developers: Deniz, Viktor.
+
+## QA findings and fixes
+- Orientation switch during the fail popup misplaced the retry button; layout re-anchored.
+-…",1.0,ragas,1496,False,,False,eval-dense
+20260810T144606Z,2026-08-10T14:47:34.258343+00:00,gpt-4o-mini,text-embedding-3-small,5,dense,recursive,False,,False,6,What is the company vacation policy and salary bands for playable engineers?,True,,I cannot find the answer in the corpus.,False,,company-overview.md | onboarding-new-dev.md | guides/review-process.md | meeting-notes/2025-12-01-production-sync.md | network-specs-unity-meta.md,5,"# Lumen Playables: Company Overview
+
+Lumen Playables is a fictional interactive ad studio founded in 2019, headquartered in Lisbon with a remote production team across Europe. The studio builds HTML5 playable ads for mobile game and app cli… || # Onboarding: New Developer
+
+Week 1: environment setup, lumen-build access, and a shadow delivery with your pod. Every new developer rebuilds one past playable from its brief as a training exercise; the result is reviewed by the pod's senio… || # Creative Review Process
+
+Every playable passes two internal reviews before client delivery: a design review at the
+first playable build, and a delivery review after QA. The delivery review is run by a developer
+from a different pod, never…",1.0,refusal_proxy,1691,False,,False,eval-dense
+20260810T144606Z,2026-08-10T14:47:46.382561+00:00,gpt-4o-mini,text-embedding-3-small,5,dense,recursive,False,,False,7,How many paid parental leave weeks do contractors get at Playable Factory?,True,,I cannot find the answer in the corpus.,False,,company-overview.md | onboarding-new-dev.md | meeting-notes/2025-06-02-production-sync.md | meeting-notes/2025-12-01-production-sync.md | meeting-notes/2025-11-17-production-sync.md,5,"# Lumen Playables: Company Overview
+
+Lumen Playables is a fictional interactive ad studio founded in 2019, headquartered in Lisbon with a remote production team across Europe. The studio builds HTML5 playable ads for mobile game and app cli… || # Onboarding: New Developer
+
+Week 1: environment setup, lumen-build access, and a shadow delivery with your pod. Every new developer rebuilds one past playable from its brief as a training exercise; the result is reviewed by the pod's senio… || # Production Sync, 2025-06-02
+
+Facilitator: Viktor. Pods present: Nova, Orbit, Flare.
+
+## Delivery status
+- Gloom Garden (Mistral Play): awaiting client feedback. Focus this week: first-interaction timing.
+- Merge Marina (Tandem Toys): in d…",1.0,refusal_proxy,8480,False,,False,eval-dense
+20260810T144606Z,2026-08-10T14:47:50.658723+00:00,gpt-4o-mini,text-embedding-3-small,5,dense,recursive,False,,False,8,What is the internal stock option strike price for 2024 grants?,True,,I cannot find the answer in the corpus.,False,,delivery-reports/2025-07-orbit-golf.md | client-briefs/orbit-golf.md | postmortems/2025-11-analytics-leak.md | changelogs/lumen-build-4.3.md | delivery-reports/2026-02-orbit-golf.md,5,"# Delivery Report: Orbit Golf, 2025-07
+
+Client: Northlight Games. Target network this cycle: Meta. Developers: Viktor, Dilek.
+
+## QA findings and fixes
+- Coin counter overlapped the notch in landscape on tall screens; safe-area padding adde… || # Client Brief: Orbit Golf (Northlight Games)
+
+Genre: sports. Target networks: AppLovin and ironSource.
+
+Goal: a short interactive ad showcasing the core sports loop. Tone: dark and mysterious.
+Audience: casual players 25-45.
+
+Must-haves: c… || # Postmortem: November 2025 Analytics Leak
+
+One AppLovin build was rejected for an outbound request. Root cause: a debug flag left enabled made the analytics buffer flush to the staging endpoint at runtime, bypassing the export-time strip.
+…",1.0,refusal_proxy,1157,False,,False,eval-dense
+20260810T144606Z,2026-08-10T14:47:54.558957+00:00,gpt-4o-mini,text-embedding-3-small,5,dense,recursive,False,,False,9,Which coffee brand is stocked in the Istanbul office kitchen?,True,,I cannot find the answer in the corpus.,False,,meeting-notes/2026-02-09-production-sync.md | meeting-notes/2025-06-16-production-sync.md | meeting-notes/2026-05-18-production-sync.md | meeting-notes/2026-01-12-production-sync.md | meeting-notes/2026-04-06-production-sync.md,5,"# Production Sync, 2026-02-09
+
+Facilitator: Deniz. Pods present: Nova, Orbit, Flare.
+
+## Delivery status
+- Sky Ferry (Grimwood Labs): awaiting client feedback. Focus this week: tutorial pacing.
+- Bubble Bakery (Pocket Comet): export stage. … || # Production Sync, 2025-06-16
+
+Facilitator: Petra. Pods present: Nova, Orbit, Flare.
+
+## Delivery status
+- Orbit Golf (Tandem Toys): in QA. Focus this week: analytics buffering.
+- Bubble Bakery (Kumquat Arcade): export stage. Note on audio … || # Production Sync, 2026-05-18
+
+Facilitator: Sofia. Pods present: Nova, Orbit, Flare.
+
+## Delivery status
+- Waffle Rush (Grimwood Labs): in QA. Focus this week: end card CTA.
+- Tidal Tycoon (Mistral Play): export stage. Note on analytics buf…",1.0,refusal_proxy,1045,False,,False,eval-dense
+20260810T144606Z,2026-08-10T14:47:58.828220+00:00,gpt-4o-mini,text-embedding-3-small,5,dense,recursive,False,,False,10,What is the CEO's personal mobile phone number?,True,,I cannot find the answer in the corpus.,False,,delivery-reports/2025-05-tidal-tycoon.md | delivery-reports/2026-05-tidal-tycoon.md | delivery-reports/2025-12-merge-marina.md | delivery-reports/2025-11-merge-marina.md | delivery-reports/2026-02-tidal-tycoon.md,5,"# Delivery Report: Tidal Tycoon, 2025-05
+
+Client: Tandem Toys. Target network this cycle: AppLovin. Developers: Elif, Ana.
+
+## QA findings and fixes
+- Coin counter overlapped the notch in landscape on tall screens; safe-area padding added.
+… || # Delivery Report: Tidal Tycoon, 2026-05
+
+Client: Tandem Toys. Target network this cycle: AppLovin. Developers: Elif, Ana.
+
+## QA findings and fixes
+- Orientation switch during the fail popup misplaced the retry button; layout re-anchored.
+… || # Delivery Report: Merge Marina, 2025-12
+
+Client: BlueHarbor Interactive. Target network this cycle: AppLovin. Developers: Marco, Sofia.
+
+## QA findings and fixes
+- Orientation switch during the fail popup misplaced the retry button; layout…",1.0,refusal_proxy,971,False,,False,eval-dense
+20260810T144606Z,2026-08-10T14:48:03.526895+00:00,gpt-4o-mini,text-embedding-3-small,5,dense,recursive,False,,False,11,What is the release date of lumen-build 4.0?,False,changelogs/lumen-build-4.0.md,"The release date of lumen-build 4.0 is October 13, 2025.",True,[1] changelogs/lumen-build-4.0.md,changelogs/lumen-build-4.0.md | changelogs/lumen-build-4.3.md | changelogs/lumen-build-4.1.md | changelogs/lumen-build-4.2.md | changelogs/lumen-build-3.9.md,5,"# lumen-build 4.0 (2025-10-13)
+
+    - New plugin system for export post-processing.
+- Dropped Node 16 support. || # lumen-build 4.3 (2026-05-25)
+
+    - Verify stage: added outbound-request scan for all networks, not only AppLovin.
+- Export: deterministic asset ordering for reproducible builds. || # lumen-build 4.1 (2026-02-16)
+
+    - Unified compression path for all asset classes to simplify the pipeline. Audio now flows through the shared compressor.
+- Faster incremental bundles.",1.0,ragas,1239,False,,False,eval-dense
+20260810T144606Z,2026-08-10T14:48:07.876709+00:00,gpt-4o-mini,text-embedding-3-small,5,dense,recursive,False,,False,12,What major support was dropped in lumen-build 4.0?,False,changelogs/lumen-build-4.0.md,Node 16 support was dropped in lumen-build 4.0.,True,[1] changelogs/lumen-build-4.0.md,changelogs/lumen-build-4.0.md | changelogs/lumen-build-4.1.md | changelogs/lumen-build-4.2.md | changelogs/lumen-build-4.3.md | changelogs/lumen-build-3.9.md,5,"# lumen-build 4.0 (2025-10-13)
+
+    - New plugin system for export post-processing.
+- Dropped Node 16 support. || # lumen-build 4.1 (2026-02-16)
+
+    - Unified compression path for all asset classes to simplify the pipeline. Audio now flows through the shared compressor.
+- Faster incremental bundles. || # lumen-build 4.2 (2026-03-30)
+
+    - Reverted the unified compression path: audio returns to its dedicated pass. See the March 2026 postmortem.
+- Verify stage now measures the final inlined artifact instead of the pre-inline bundle.
+- Stag…",1.0,ragas,1067,False,,False,eval-dense
+20260810T144606Z,2026-08-10T14:48:13.072922+00:00,gpt-4o-mini,text-embedding-3-small,5,dense,recursive,False,,False,13,What date was the lumen-build 3.9 released?,False,changelogs/lumen-build-3.9.md,"The lumen-build 3.9 was released on June 30, 2025.",True,[5] changelogs/lumen-build-3.9.md,changelogs/lumen-build-4.0.md | sdk-notes-v3.md | changelogs/lumen-build-3.8.md | changelogs/lumen-build-4.1.md | changelogs/lumen-build-3.9.md,5,"# lumen-build 4.0 (2025-10-13)
+
+    - New plugin system for export post-processing.
+- Dropped Node 16 support. || # Lumen SDK v3 (current)
+
+v3 is the current SDK for all new playables, mandatory since January 2026. It supersedes v2 and is not backward compatible.
+
+Initialization: call LumenSDK.init(config) before any game code runs; init returns a prom… || # lumen-build 3.8 (2025-04-14)
+
+    - Added glyph coverage check for Japanese and Korean to the verify stage.
+- Compression: texture atlas packing improved, average 6 percent size reduction.",1.0,ragas,1302,False,,False,eval-dense
+20260810T144606Z,2026-08-10T14:48:24.729049+00:00,gpt-4o-mini,text-embedding-3-small,5,dense,recursive,False,,False,14,What change was made regarding the --network flag in lumen-build 3.9?,False,changelogs/lumen-build-3.9.md,"In lumen-build 3.9, the --network flag was updated to validate against a supported list of export profiles, consolidating per-network export profiles.",True,[1] changelogs/lumen-build-3.9.md,changelogs/lumen-build-3.9.md | changelogs/lumen-build-4.3.md | changelogs/lumen-build-4.0.md | changelogs/lumen-build-4.1.md | build-pipeline.md,5,"# lumen-build 3.9 (2025-06-30)
+
+    - Per-network export profiles consolidated; --network flag now validates against supported list.
+- Verify stage reports size per asset class. || # lumen-build 4.3 (2026-05-25)
+
+    - Verify stage: added outbound-request scan for all networks, not only AppLovin.
+- Export: deterministic asset ordering for reproducible builds. || # lumen-build 4.0 (2025-10-13)
+
+    - New plugin system for export post-processing.
+- Dropped Node 16 support.",0.6667,ragas,1633,False,,False,eval-dense
+20260810T144606Z,2026-08-10T14:48:32.962818+00:00,gpt-4o-mini,text-embedding-3-small,5,dense,recursive,False,,False,15,What new feature was added to the verify stage in lumen-build 4.3?,False,changelogs/lumen-build-4.3.md,"The new feature added to the verify stage in lumen-build 4.3 is an outbound-request scan for all networks, not only AppLovin.",True,[1] changelogs/lumen-build-4.3.md,changelogs/lumen-build-4.3.md | changelogs/lumen-build-4.2.md | changelogs/lumen-build-3.9.md | build-pipeline.md | changelogs/lumen-build-3.8.md,5,"# lumen-build 4.3 (2026-05-25)
+
+    - Verify stage: added outbound-request scan for all networks, not only AppLovin.
+- Export: deterministic asset ordering for reproducible builds. || # lumen-build 4.2 (2026-03-30)
+
+    - Reverted the unified compression path: audio returns to its dedicated pass. See the March 2026 postmortem.
+- Verify stage now measures the final inlined artifact instead of the pre-inline bundle.
+- Stag… || # lumen-build 3.9 (2025-06-30)
+
+    - Per-network export profiles consolidated; --network flag now validates against supported list.
+- Verify stage reports size per asset class.",1.0,ragas,1538,False,,False,eval-dense
+20260810T144606Z,2026-08-10T14:48:37.981761+00:00,gpt-4o-mini,text-embedding-3-small,5,dense,recursive,False,,False,16,What date was the lumen-build 4.3 released?,False,changelogs/lumen-build-4.3.md,"The lumen-build 4.3 was released on May 25, 2026.",True,[3] changelogs/lumen-build-4.3.md,changelogs/lumen-build-4.0.md | changelogs/lumen-build-4.1.md | changelogs/lumen-build-4.3.md | changelogs/lumen-build-4.2.md | sdk-notes-v3.md,5,"# lumen-build 4.0 (2025-10-13)
+
+    - New plugin system for export post-processing.
+- Dropped Node 16 support. || # lumen-build 4.1 (2026-02-16)
+
+    - Unified compression path for all asset classes to simplify the pipeline. Audio now flows through the shared compressor.
+- Faster incremental bundles. || # lumen-build 4.3 (2026-05-25)
+
+    - Verify stage: added outbound-request scan for all networks, not only AppLovin.
+- Export: deterministic asset ordering for reproducible builds.",1.0,ragas,1254,False,,False,eval-dense
+20260810T144606Z,2026-08-10T14:48:42.914645+00:00,gpt-4o-mini,text-embedding-3-small,5,dense,recursive,False,,False,17,What date was the lumen-build 4.1 released?,False,changelogs/lumen-build-4.1.md,"The lumen-build 4.1 was released on February 16, 2026.",True,[2] changelogs/lumen-build-4.1.md,changelogs/lumen-build-4.0.md | changelogs/lumen-build-4.1.md | changelogs/lumen-build-4.3.md | changelogs/lumen-build-4.2.md | changelogs/lumen-build-3.8.md,5,"# lumen-build 4.0 (2025-10-13)
+
+    - New plugin system for export post-processing.
+- Dropped Node 16 support. || # lumen-build 4.1 (2026-02-16)
+
+    - Unified compression path for all asset classes to simplify the pipeline. Audio now flows through the shared compressor.
+- Faster incremental bundles. || # lumen-build 4.3 (2026-05-25)
+
+    - Verify stage: added outbound-request scan for all networks, not only AppLovin.
+- Export: deterministic asset ordering for reproducible builds.",1.0,ragas,1141,False,,False,eval-dense
+20260810T144606Z,2026-08-10T14:48:51.230085+00:00,gpt-4o-mini,text-embedding-3-small,5,dense,recursive,False,,False,18,What change was made to the compression path in lumen-build 4.1?,False,changelogs/lumen-build-4.1.md,"In lumen-build 4.1, the change made to the compression path was the unification of the compression path for all asset classes, allowing audio to flow through the shared compressor.",True,[1] changelogs/lumen-build-4.1.md,changelogs/lumen-build-4.1.md | changelogs/lumen-build-4.2.md | changelogs/lumen-build-3.8.md | changelogs/lumen-build-4.3.md | changelogs/lumen-build-4.0.md,5,"# lumen-build 4.1 (2026-02-16)
+
+    - Unified compression path for all asset classes to simplify the pipeline. Audio now flows through the shared compressor.
+- Faster incremental bundles. || # lumen-build 4.2 (2026-03-30)
+
+    - Reverted the unified compression path: audio returns to its dedicated pass. See the March 2026 postmortem.
+- Verify stage now measures the final inlined artifact instead of the pre-inline bundle.
+- Stag… || # lumen-build 3.8 (2025-04-14)
+
+    - Added glyph coverage check for Japanese and Korean to the verify stage.
+- Compression: texture atlas packing improved, average 6 percent size reduction.",1.0,ragas,1952,False,,False,eval-dense
+20260810T144606Z,2026-08-10T14:48:58.119900+00:00,gpt-4o-mini,text-embedding-3-small,5,dense,recursive,False,,False,19,What new feature was added to the verify stage in lumen-build 3.8?,False,changelogs/lumen-build-3.8.md,The new feature added to the verify stage in lumen-build 3.8 was a glyph coverage check for Japanese and Korean.,True,[4] changelogs/lumen-build-3.8.md,changelogs/lumen-build-4.3.md | changelogs/lumen-build-4.2.md | changelogs/lumen-build-3.9.md | changelogs/lumen-build-3.8.md | build-pipeline.md,5,"# lumen-build 4.3 (2026-05-25)
+
+    - Verify stage: added outbound-request scan for all networks, not only AppLovin.
+- Export: deterministic asset ordering for reproducible builds. || # lumen-build 4.2 (2026-03-30)
+
+    - Reverted the unified compression path: audio returns to its dedicated pass. See the March 2026 postmortem.
+- Verify stage now measures the final inlined artifact instead of the pre-inline bundle.
+- Stag… || # lumen-build 3.9 (2025-06-30)
+
+    - Per-network export profiles consolidated; --network flag now validates against supported list.
+- Verify stage reports size per asset class.",1.0,ragas,1189,False,,False,eval-dense
+20260810T144606Z,2026-08-10T14:49:02.818868+00:00,gpt-4o-mini,text-embedding-3-small,5,dense,recursive,False,,False,20,What is the average size reduction achieved in texture atlas packing in lumen-build 3.8?,False,changelogs/lumen-build-3.8.md,The average size reduction achieved in texture atlas packing in lumen-build 3.8 is 6 percent.,True,[1] changelogs/lumen-build-3.8.md,changelogs/lumen-build-3.8.md | changelogs/lumen-build-4.1.md | changelogs/lumen-build-4.2.md | changelogs/lumen-build-3.9.md | changelogs/lumen-build-4.0.md,5,"# lumen-build 3.8 (2025-04-14)
+
+    - Added glyph coverage check for Japanese and Korean to the verify stage.
+- Compression: texture atlas packing improved, average 6 percent size reduction. || # lumen-build 4.1 (2026-02-16)
+
+    - Unified compression path for all asset classes to simplify the pipeline. Audio now flows through the shared compressor.
+- Faster incremental bundles. || # lumen-build 4.2 (2026-03-30)
+
+    - Reverted the unified compression path: audio returns to its dedicated pass. See the March 2026 postmortem.
+- Verify stage now measures the final inlined artifact instead of the pre-inline bundle.
+- Stag…",1.0,ragas,1157,False,,False,eval-dense
+20260810T144606Z,2026-08-10T14:49:19.052076+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,1,"What is the maximum file size for an AppLovin playable, and how does it ship?",False,network-specs-applovin.md,"The maximum file size for an AppLovin playable is 5 MB for the final single HTML file, which ships as a single self-contained HTML file with all assets inlined (base64) and no external network requests allowed at runtime.",True,[1] network-specs-applovin.md,network-specs-applovin.md | network-specs-unity-meta.md | incident-postmortem-2026-03.md | company-overview.md | qa-checklist.md,5,"# Network Specs: AppLovin
+
+AppLovin playables at Lumen ship as a single self-contained HTML file. All assets are inlined (base64) and no external network requests are allowed at runtime.
+
+Hard limits:
+- Maximum file size: 5 MB for the final… || # Network Specs: Unity and Meta
+
+Unity playables ship as a ZIP archive with an index.html entry point. The archive limit is 5 MB, and up to 10 MB after unzip. Unity requires the mraid.js reference to stay in the head of the document.
+
+Meta … || # Postmortem: March 2026 Delivery Incident
+
+In March 2026 (fictional), eleven AppLovin deliveries were rejected in one week for exceeding the 5 MB single-file limit, despite passing the internal verify stage.
+
+Root cause: a lumen-build upda…",1.0,ragas,1677,True,0.5,False,eval-hybrid_a0.5
+20260810T144606Z,2026-08-10T14:49:31.724122+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,2,"How do I initialize the current Lumen SDK, and what happened to lumen.track?",False,sdk-notes-v3.md,"To initialize the current Lumen SDK (v3), you need to call `LumenSDK.init(config)` before any game code runs. This initialization returns a promise that resolves when the network wrapper is ready, and you should not start the render loop until it resolves. The old `lumen.track` calls from v2 are no longer recognized and will fail silently, which is a common migration issue.",True,[1] sdk-notes-v3.md,sdk-notes-v3.md | sdk-notes-v2.md | company-overview.md | onboarding-new-dev.md | changelogs/lumen-build-4.3.md,5,"# Lumen SDK v3 (current)
+
+v3 is the current SDK for all new playables, mandatory since January 2026. It supersedes v2 and is not backward compatible.
+
+Initialization: call LumenSDK.init(config) before any game code runs; init returns a prom… || # Lumen SDK v2 (DEPRECATED)
+
+Status: deprecated since January 2026. Do not use for new playables. Kept for maintenance of legacy projects only. See ""Lumen SDK v3"" for current guidance.
+
+In v2, a playable initializes the SDK by calling lumen… || # Lumen Playables: Company Overview
+
+Lumen Playables is a fictional interactive ad studio founded in 2019, headquartered in Lisbon with a remote production team across Europe. The studio builds HTML5 playable ads for mobile game and app cli…",1.0,ragas,2019,True,0.5,False,eval-hybrid_a0.5
+20260810T144606Z,2026-08-10T14:49:40.730685+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,3,Why are sound assets built in a separate pass?,False,build-pipeline.md | incident-postmortem-2026-03.md,"Sound assets are built in a separate pass to avoid nondeterministic size spikes that occur when compressing audio together with textures, which can lead to exceeding the AppLovin 5 MB limit. This separation helps ensure that any size regressions can be traced back to the audio pass first, as it has been identified as a common cause of such issues during the verify stage.",True,[1] build-pipeline.md,build-pipeline.md | guides/asset-naming.md | changelogs/lumen-build-4.1.md | incident-postmortem-2026-03.md | changelogs/lumen-build-4.2.md,5,"# Build Pipeline
+
+Lumen builds run through the internal CLI, lumen-build, maintained by the Platform team.
+
+The pipeline has four stages: bundle, compress, inline, verify. The verify stage runs the same checks as network QA bots (size, forb… || # Asset Naming Conventions
+
+All assets follow pod_game_asset_variant, lower snake case: nova_bubblebakery_tile_croissant.
+Textures carry their target compression in the suffix when it deviates from the default profile.
+Audio files live unde… || # lumen-build 4.1 (2026-02-16)
+
+    - Unified compression path for all asset classes to simplify the pipeline. Audio now flows through the shared compressor.
+- Faster incremental bundles.",1.0,ragas,1645,True,0.5,False,eval-hybrid_a0.5
+20260810T144606Z,2026-08-10T14:49:55.776844+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,4,What caused the March 2026 AppLovin rejections and what was fixed?,False,incident-postmortem-2026-03.md,"The March 2026 AppLovin rejections were caused by a lumen-build update that changed the order of the compress and inline stages, resulting in audio being compressed with textures instead of in its dedicated pass. This caused audio-heavy playables to exceed the 5 MB limit on the network side. The fixes included measuring the final inlined artifact during the verify stage, pinning the stage order in CI, and implementing a regression test that builds the three heaviest historical playables on every pipeline change.",True,[1] incident-postmortem-2026-03.md | [4] changelogs/lumen-build-4.2.md,incident-postmortem-2026-03.md | postmortems/2025-11-analytics-leak.md | network-specs-applovin.md | changelogs/lumen-build-4.2.md | delivery-reports/2025-12-merge-marina.md,5,"# Postmortem: March 2026 Delivery Incident
+
+In March 2026 (fictional), eleven AppLovin deliveries were rejected in one week for exceeding the 5 MB single-file limit, despite passing the internal verify stage.
+
+Root cause: a lumen-build upda… || # Postmortem: November 2025 Analytics Leak
+
+One AppLovin build was rejected for an outbound request. Root cause: a debug flag left enabled made the analytics buffer flush to the staging endpoint at runtime, bypassing the export-time strip.
+… || # Network Specs: AppLovin
+
+AppLovin playables at Lumen ship as a single self-contained HTML file. All assets are inlined (base64) and no external network requests are allowed at runtime.
+
+Hard limits:
+- Maximum file size: 5 MB for the final…",1.0,ragas,3279,True,0.5,False,eval-hybrid_a0.5
+20260810T144606Z,2026-08-10T14:50:01.559615+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,5,"Which languages must every playable ship with, and what is the fallback?",False,localization-guide.md,"Every playable ship must include the following minimum languages: English, Spanish, Portuguese, German, French, Japanese, and Korean. If language detection fails or the locale is unsupported, English serves as the fallback language.",True,[1] localization-guide.md,localization-guide.md | qa-checklist.md | network-specs-unity-meta.md | playable-brief-guidelines.md | sdk-notes-v2.md,5,"# Localization Guide
+
+Every Lumen playable ships with a minimum language set: English, Spanish, Portuguese, German, French, Japanese and Korean. Clients can add languages, never remove from the minimum set.
+
+Language is auto-detected from t… || # Pre-Delivery QA Checklist
+
+Run before every client delivery, no exceptions:
+
+1. Size check per target network (see network spec docs).
+2. First interaction reachable within 3 seconds.
+3. No outbound requests in AppLovin builds; analytics … || # Network Specs: Unity and Meta
+
+Unity playables ship as a ZIP archive with an index.html entry point. The archive limit is 5 MB, and up to 10 MB after unzip. Unity requires the mraid.js reference to stay in the head of the document.
+
+Meta …",1.0,ragas,1509,True,0.5,False,eval-hybrid_a0.5
+20260810T144606Z,2026-08-10T14:50:06.754716+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,6,What is the company vacation policy and salary bands for playable engineers?,True,,I cannot find the answer in the corpus.,False,,company-overview.md | onboarding-new-dev.md | guides/review-process.md | network-specs-unity-meta.md | meeting-notes/2025-12-01-production-sync.md,5,"# Lumen Playables: Company Overview
+
+Lumen Playables is a fictional interactive ad studio founded in 2019, headquartered in Lisbon with a remote production team across Europe. The studio builds HTML5 playable ads for mobile game and app cli… || # Onboarding: New Developer
+
+Week 1: environment setup, lumen-build access, and a shadow delivery with your pod. Every new developer rebuilds one past playable from its brief as a training exercise; the result is reviewed by the pod's senio… || # Creative Review Process
+
+Every playable passes two internal reviews before client delivery: a design review at the
+first playable build, and a delivery review after QA. The delivery review is run by a developer
+from a different pod, never…",1.0,refusal_proxy,1461,True,0.5,False,eval-hybrid_a0.5
+20260810T144606Z,2026-08-10T14:50:11.273113+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,7,How many paid parental leave weeks do contractors get at Playable Factory?,True,,I cannot find the answer in the corpus.,False,,onboarding-new-dev.md | company-overview.md | sdk-notes-v2.md | guides/review-process.md | meeting-notes/2025-06-02-production-sync.md,5,"# Onboarding: New Developer
+
+Week 1: environment setup, lumen-build access, and a shadow delivery with your pod. Every new developer rebuilds one past playable from its brief as a training exercise; the result is reviewed by the pod's senio… || # Lumen Playables: Company Overview
+
+Lumen Playables is a fictional interactive ad studio founded in 2019, headquartered in Lisbon with a remote production team across Europe. The studio builds HTML5 playable ads for mobile game and app cli… || # Lumen SDK v2 (DEPRECATED)
+
+Status: deprecated since January 2026. Do not use for new playables. Kept for maintenance of legacy projects only. See ""Lumen SDK v3"" for current guidance.
+
+In v2, a playable initializes the SDK by calling lumen…",1.0,refusal_proxy,1163,True,0.5,False,eval-hybrid_a0.5
+20260810T144606Z,2026-08-10T14:50:15.623987+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,8,What is the internal stock option strike price for 2024 grants?,True,,I cannot find the answer in the corpus.,False,,changelogs/lumen-build-4.3.md | postmortems/2025-11-analytics-leak.md | delivery-reports/2025-07-orbit-golf.md | incident-postmortem-2026-03.md | client-briefs/orbit-golf.md,5,"# lumen-build 4.3 (2026-05-25)
+
+    - Verify stage: added outbound-request scan for all networks, not only AppLovin.
+- Export: deterministic asset ordering for reproducible builds. || # Postmortem: November 2025 Analytics Leak
+
+One AppLovin build was rejected for an outbound request. Root cause: a debug flag left enabled made the analytics buffer flush to the staging endpoint at runtime, bypassing the export-time strip.
+… || # Delivery Report: Orbit Golf, 2025-07
+
+Client: Northlight Games. Target network this cycle: Meta. Developers: Viktor, Dilek.
+
+## QA findings and fixes
+- Coin counter overlapped the notch in landscape on tall screens; safe-area padding adde…",1.0,refusal_proxy,1169,True,0.5,False,eval-hybrid_a0.5
+20260810T144606Z,2026-08-10T14:50:21.487658+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,9,Which coffee brand is stocked in the Istanbul office kitchen?,True,,I cannot find the answer in the corpus.,False,,meeting-notes/2026-02-09-production-sync.md | style-guide-ui.md | client-briefs/sky-ferry.md | meeting-notes/2025-06-16-production-sync.md | meeting-notes/2026-05-18-production-sync.md,5,"# Production Sync, 2026-02-09
+
+Facilitator: Deniz. Pods present: Nova, Orbit, Flare.
+
+## Delivery status
+- Sky Ferry (Grimwood Labs): awaiting client feedback. Focus this week: tutorial pacing.
+- Bubble Bakery (Pocket Comet): export stage. … || # UI Style Guide
+
+Buttons: a playable has exactly one primary CTA visible at a time. The CTA uses the client brand color; if contrast against the background is below 4.5:1, add the standard dark scrim behind it.
+
+Text: system font stack onl… || # Client Brief: Sky Ferry (Pocket Comet)
+
+Genre: arcade. Target networks: Mintegral and AppLovin.
+
+Goal: a short interactive ad showcasing the core arcade loop. Tone: energetic and gritty.
+Audience: mid-core players 18-34.
+
+Must-haves: clie…",1.0,refusal_proxy,1713,True,0.5,False,eval-hybrid_a0.5
+20260810T144606Z,2026-08-10T14:50:32.758708+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,10,What is the CEO's personal mobile phone number?,True,,I cannot find the answer in the corpus.,False,,delivery-reports/2025-05-tidal-tycoon.md | company-overview.md | delivery-reports/2026-05-tidal-tycoon.md | delivery-reports/2025-12-merge-marina.md | delivery-reports/2025-11-merge-marina.md,5,"# Delivery Report: Tidal Tycoon, 2025-05
+
+Client: Tandem Toys. Target network this cycle: AppLovin. Developers: Elif, Ana.
+
+## QA findings and fixes
+- Coin counter overlapped the notch in landscape on tall screens; safe-area padding added.
+… || # Lumen Playables: Company Overview
+
+Lumen Playables is a fictional interactive ad studio founded in 2019, headquartered in Lisbon with a remote production team across Europe. The studio builds HTML5 playable ads for mobile game and app cli… || # Delivery Report: Tidal Tycoon, 2026-05
+
+Client: Tandem Toys. Target network this cycle: AppLovin. Developers: Elif, Ana.
+
+## QA findings and fixes
+- Orientation switch during the fail popup misplaced the retry button; layout re-anchored.
+…",1.0,refusal_proxy,1145,True,0.5,False,eval-hybrid_a0.5
+20260810T144606Z,2026-08-10T14:50:37.951164+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,11,What is the release date of lumen-build 4.0?,False,changelogs/lumen-build-4.0.md,"The release date of lumen-build 4.0 is October 13, 2025.",True,[1] changelogs/lumen-build-4.0.md,changelogs/lumen-build-4.0.md | sdk-notes-v2.md | changelogs/lumen-build-4.3.md | build-pipeline.md | changelogs/lumen-build-4.2.md,5,"# lumen-build 4.0 (2025-10-13)
+
+    - New plugin system for export post-processing.
+- Dropped Node 16 support. || # Lumen SDK v2 (DEPRECATED)
+
+Status: deprecated since January 2026. Do not use for new playables. Kept for maintenance of legacy projects only. See ""Lumen SDK v3"" for current guidance.
+
+In v2, a playable initializes the SDK by calling lumen… || # lumen-build 4.3 (2026-05-25)
+
+    - Verify stage: added outbound-request scan for all networks, not only AppLovin.
+- Export: deterministic asset ordering for reproducible builds.",1.0,ragas,1758,True,0.5,False,eval-hybrid_a0.5
+20260810T144606Z,2026-08-10T14:50:42.550965+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,12,What major support was dropped in lumen-build 4.0?,False,changelogs/lumen-build-4.0.md,Node 16 support was dropped in lumen-build 4.0.,True,[1] changelogs/lumen-build-4.0.md,changelogs/lumen-build-4.0.md | changelogs/lumen-build-4.2.md | changelogs/lumen-build-4.1.md | changelogs/lumen-build-4.3.md | changelogs/lumen-build-3.9.md,5,"# lumen-build 4.0 (2025-10-13)
+
+    - New plugin system for export post-processing.
+- Dropped Node 16 support. || # lumen-build 4.2 (2026-03-30)
+
+    - Reverted the unified compression path: audio returns to its dedicated pass. See the March 2026 postmortem.
+- Verify stage now measures the final inlined artifact instead of the pre-inline bundle.
+- Stag… || # lumen-build 4.1 (2026-02-16)
+
+    - Unified compression path for all asset classes to simplify the pipeline. Audio now flows through the shared compressor.
+- Faster incremental bundles.",1.0,ragas,1379,True,0.5,False,eval-hybrid_a0.5
+20260810T144606Z,2026-08-10T14:50:50.484405+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,13,What date was the lumen-build 3.9 released?,False,changelogs/lumen-build-3.9.md,"The lumen-build 3.9 was released on June 30, 2025.",True,[5] changelogs/lumen-build-3.9.md,changelogs/lumen-build-4.0.md | sdk-notes-v3.md | changelogs/lumen-build-3.8.md | changelogs/lumen-build-4.1.md | changelogs/lumen-build-3.9.md,5,"# lumen-build 4.0 (2025-10-13)
+
+    - New plugin system for export post-processing.
+- Dropped Node 16 support. || # Lumen SDK v3 (current)
+
+v3 is the current SDK for all new playables, mandatory since January 2026. It supersedes v2 and is not backward compatible.
+
+Initialization: call LumenSDK.init(config) before any game code runs; init returns a prom… || # lumen-build 3.8 (2025-04-14)
+
+    - Added glyph coverage check for Japanese and Korean to the verify stage.
+- Compression: texture atlas packing improved, average 6 percent size reduction.",1.0,ragas,1538,True,0.5,False,eval-hybrid_a0.5
+20260810T144606Z,2026-08-10T14:50:56.817154+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,14,What change was made regarding the --network flag in lumen-build 3.9?,False,changelogs/lumen-build-3.9.md,"In lumen-build 3.9, the --network flag was updated to validate against a supported list of per-network export profiles.",True,[1] changelogs/lumen-build-3.9.md,changelogs/lumen-build-3.9.md | build-pipeline.md | changelogs/lumen-build-4.3.md | postmortems/2025-11-analytics-leak.md | changelogs/lumen-build-4.2.md,5,"# lumen-build 3.9 (2025-06-30)
+
+    - Per-network export profiles consolidated; --network flag now validates against supported list.
+- Verify stage reports size per asset class. || # Build Pipeline
+
+Lumen builds run through the internal CLI, lumen-build, maintained by the Platform team.
+
+The pipeline has four stages: bundle, compress, inline, verify. The verify stage runs the same checks as network QA bots (size, forb… || # lumen-build 4.3 (2026-05-25)
+
+    - Verify stage: added outbound-request scan for all networks, not only AppLovin.
+- Export: deterministic asset ordering for reproducible builds.",1.0,ragas,1159,True,0.5,False,eval-hybrid_a0.5
+20260810T144606Z,2026-08-10T14:51:06.668896+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,15,What new feature was added to the verify stage in lumen-build 4.3?,False,changelogs/lumen-build-4.3.md,"The new feature added to the verify stage in lumen-build 4.3 is an outbound-request scan for all networks, not only AppLovin.",True,[1] changelogs/lumen-build-4.3.md,changelogs/lumen-build-4.3.md | changelogs/lumen-build-4.2.md | changelogs/lumen-build-3.8.md | build-pipeline.md | changelogs/lumen-build-3.9.md,5,"# lumen-build 4.3 (2026-05-25)
+
+    - Verify stage: added outbound-request scan for all networks, not only AppLovin.
+- Export: deterministic asset ordering for reproducible builds. || # lumen-build 4.2 (2026-03-30)
+
+    - Reverted the unified compression path: audio returns to its dedicated pass. See the March 2026 postmortem.
+- Verify stage now measures the final inlined artifact instead of the pre-inline bundle.
+- Stag… || # lumen-build 3.8 (2025-04-14)
+
+    - Added glyph coverage check for Japanese and Korean to the verify stage.
+- Compression: texture atlas packing improved, average 6 percent size reduction.",1.0,ragas,1534,True,0.5,False,eval-hybrid_a0.5
+20260810T144606Z,2026-08-10T14:51:13.517940+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,16,What date was the lumen-build 4.3 released?,False,changelogs/lumen-build-4.3.md,"The lumen-build 4.3 was released on May 25, 2026.",True,[2] changelogs/lumen-build-4.3.md,changelogs/lumen-build-4.0.md | changelogs/lumen-build-4.3.md | changelogs/lumen-build-4.1.md | sdk-notes-v2.md | changelogs/lumen-build-4.2.md,5,"# lumen-build 4.0 (2025-10-13)
+
+    - New plugin system for export post-processing.
+- Dropped Node 16 support. || # lumen-build 4.3 (2026-05-25)
+
+    - Verify stage: added outbound-request scan for all networks, not only AppLovin.
+- Export: deterministic asset ordering for reproducible builds. || # lumen-build 4.1 (2026-02-16)
+
+    - Unified compression path for all asset classes to simplify the pipeline. Audio now flows through the shared compressor.
+- Faster incremental bundles.",1.0,ragas,1270,True,0.5,False,eval-hybrid_a0.5
+20260810T144606Z,2026-08-10T14:51:18.571222+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,17,What date was the lumen-build 4.1 released?,False,changelogs/lumen-build-4.1.md,"The lumen-build 4.1 was released on February 16, 2026.",True,[2] changelogs/lumen-build-4.1.md,changelogs/lumen-build-4.0.md | changelogs/lumen-build-4.1.md | changelogs/lumen-build-4.3.md | sdk-notes-v2.md | changelogs/lumen-build-4.2.md,5,"# lumen-build 4.0 (2025-10-13)
+
+    - New plugin system for export post-processing.
+- Dropped Node 16 support. || # lumen-build 4.1 (2026-02-16)
+
+    - Unified compression path for all asset classes to simplify the pipeline. Audio now flows through the shared compressor.
+- Faster incremental bundles. || # lumen-build 4.3 (2026-05-25)
+
+    - Verify stage: added outbound-request scan for all networks, not only AppLovin.
+- Export: deterministic asset ordering for reproducible builds.",1.0,ragas,1237,True,0.5,False,eval-hybrid_a0.5
+20260810T144606Z,2026-08-10T14:51:25.496781+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,18,What change was made to the compression path in lumen-build 4.1?,False,changelogs/lumen-build-4.1.md,"In lumen-build 4.1, the change made to the compression path was the unification of the compression path for all asset classes, allowing audio to flow through the shared compressor.",True,[1] changelogs/lumen-build-4.1.md,changelogs/lumen-build-4.1.md | changelogs/lumen-build-4.2.md | changelogs/lumen-build-3.8.md | build-pipeline.md | changelogs/lumen-build-4.0.md,5,"# lumen-build 4.1 (2026-02-16)
+
+    - Unified compression path for all asset classes to simplify the pipeline. Audio now flows through the shared compressor.
+- Faster incremental bundles. || # lumen-build 4.2 (2026-03-30)
+
+    - Reverted the unified compression path: audio returns to its dedicated pass. See the March 2026 postmortem.
+- Verify stage now measures the final inlined artifact instead of the pre-inline bundle.
+- Stag… || # lumen-build 3.8 (2025-04-14)
+
+    - Added glyph coverage check for Japanese and Korean to the verify stage.
+- Compression: texture atlas packing improved, average 6 percent size reduction.",1.0,ragas,1665,True,0.5,False,eval-hybrid_a0.5
+20260810T144606Z,2026-08-10T14:51:32.487565+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,19,What new feature was added to the verify stage in lumen-build 3.8?,False,changelogs/lumen-build-3.8.md,The new feature added to the verify stage in lumen-build 3.8 was a glyph coverage check for Japanese and Korean.,True,[2] changelogs/lumen-build-3.8.md,changelogs/lumen-build-4.3.md | changelogs/lumen-build-3.8.md | changelogs/lumen-build-4.2.md | changelogs/lumen-build-3.9.md | build-pipeline.md,5,"# lumen-build 4.3 (2026-05-25)
+
+    - Verify stage: added outbound-request scan for all networks, not only AppLovin.
+- Export: deterministic asset ordering for reproducible builds. || # lumen-build 3.8 (2025-04-14)
+
+    - Added glyph coverage check for Japanese and Korean to the verify stage.
+- Compression: texture atlas packing improved, average 6 percent size reduction. || # lumen-build 4.2 (2026-03-30)
+
+    - Reverted the unified compression path: audio returns to its dedicated pass. See the March 2026 postmortem.
+- Verify stage now measures the final inlined artifact instead of the pre-inline bundle.
+- Stag…",1.0,ragas,1922,True,0.5,False,eval-hybrid_a0.5
+20260810T144606Z,2026-08-10T14:51:39.143596+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,20,What is the average size reduction achieved in texture atlas packing in lumen-build 3.8?,False,changelogs/lumen-build-3.8.md,The average size reduction achieved in texture atlas packing in lumen-build 3.8 is 6 percent.,True,[1] changelogs/lumen-build-3.8.md,changelogs/lumen-build-3.8.md | changelogs/lumen-build-4.1.md | changelogs/lumen-build-4.2.md | guides/asset-naming.md | build-pipeline.md,5,"# lumen-build 3.8 (2025-04-14)
+
+    - Added glyph coverage check for Japanese and Korean to the verify stage.
+- Compression: texture atlas packing improved, average 6 percent size reduction. || # lumen-build 4.1 (2026-02-16)
+
+    - Unified compression path for all asset classes to simplify the pipeline. Audio now flows through the shared compressor.
+- Faster incremental bundles. || # lumen-build 4.2 (2026-03-30)
+
+    - Reverted the unified compression path: audio returns to its dedicated pass. See the March 2026 postmortem.
+- Verify stage now measures the final inlined artifact instead of the pre-inline bundle.
+- Stag…",1.0,ragas,1171,True,0.5,False,eval-hybrid_a0.5
+20260810T144606Z,2026-08-10T14:51:51.529193+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5_rerank,recursive,True,0.5,True,1,"What is the maximum file size for an AppLovin playable, and how does it ship?",False,network-specs-applovin.md,"The maximum file size for an AppLovin playable is 5 MB for the final single HTML file, which ships as a self-contained HTML file with all assets inlined (base64) and no external network requests allowed at runtime.",True,[1] network-specs-applovin.md,network-specs-applovin.md | incident-postmortem-2026-03.md | network-specs-unity-meta.md | company-overview.md | qa-checklist.md,5,"# Network Specs: AppLovin
+
+AppLovin playables at Lumen ship as a single self-contained HTML file. All assets are inlined (base64) and no external network requests are allowed at runtime.
+
+Hard limits:
+- Maximum file size: 5 MB for the final… || # Postmortem: March 2026 Delivery Incident
+
+In March 2026 (fictional), eleven AppLovin deliveries were rejected in one week for exceeding the 5 MB single-file limit, despite passing the internal verify stage.
+
+Root cause: a lumen-build upda… || # Network Specs: Unity and Meta
+
+Unity playables ship as a ZIP archive with an index.html entry point. The archive limit is 5 MB, and up to 10 MB after unzip. Unity requires the mraid.js reference to stay in the head of the document.
+
+Meta …",1.0,ragas,4724,True,0.5,True,eval-hybrid_a0.5_rerank
+20260810T144606Z,2026-08-10T14:52:08.441460+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5_rerank,recursive,True,0.5,True,2,"How do I initialize the current Lumen SDK, and what happened to lumen.track?",False,sdk-notes-v3.md,"To initialize the current Lumen SDK, call `LumenSDK.init(config)` before any game code runs; this returns a promise that resolves when the network wrapper is ready. The old `lumen.track` calls from v2 are no longer recognized and will fail silently, as they have been removed in the migration to SDK v3.",True,[1] sdk-notes-v3.md | [2] meeting-notes/2026-03-23-production-sync.md | [3] meeting-notes/2026-01-26-production-sync.md | [4] meeting-notes/2026-01-12-production-sync.md | [5] meeting-notes/2026-04-06-production-sync.md,sdk-notes-v3.md | meeting-notes/2026-03-23-production-sync.md | meeting-notes/2026-01-26-production-sync.md | meeting-notes/2026-01-12-production-sync.md | meeting-notes/2026-04-06-production-sync.md,5,"# Lumen SDK v3 (current)
+
+v3 is the current SDK for all new playables, mandatory since January 2026. It supersedes v2 and is not backward compatible.
+
+Initialization: call LumenSDK.init(config) before any game code runs; init returns a prom… || # Production Sync, 2026-03-23
+
+Facilitator: Ana. Pods present: Nova, Orbit, Flare.
+
+## Delivery status
+- Rooftop Dash (Grimwood Labs): delivered. Focus this week: fail-state retry.
+- Puzzle Pier (Pocket Comet): in development. Note on end c… || # Production Sync, 2026-01-26
+
+Facilitator: Elif. Pods present: Nova, Orbit, Flare.
+
+## Delivery status
+- Orbit Golf (Pocket Comet): blocked on assets. Focus this week: localization coverage.
+- Sky Ferry (Northlight Games): in development. …",1.0,ragas,5554,True,0.5,True,eval-hybrid_a0.5_rerank
+20260810T144606Z,2026-08-10T14:52:23.104509+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5_rerank,recursive,True,0.5,True,3,Why are sound assets built in a separate pass?,False,build-pipeline.md | incident-postmortem-2026-03.md,"Sound assets are built in a separate pass to avoid nondeterministic size spikes that occur when audio is compressed together with textures. This issue has previously caused builds to exceed the AppLovin 5 MB limit, leading to delivery failures. By encoding audio in a dedicated pass and injecting it at the inline stage, these size issues can be mitigated, ensuring compliance with size restrictions.",True,[1] build-pipeline.md,build-pipeline.md | incident-postmortem-2026-03.md | changelogs/lumen-build-4.2.md | guides/asset-naming.md | changelogs/lumen-build-4.1.md,5,"# Build Pipeline
+
+Lumen builds run through the internal CLI, lumen-build, maintained by the Platform team.
+
+The pipeline has four stages: bundle, compress, inline, verify. The verify stage runs the same checks as network QA bots (size, forb… || # Postmortem: March 2026 Delivery Incident
+
+In March 2026 (fictional), eleven AppLovin deliveries were rejected in one week for exceeding the 5 MB single-file limit, despite passing the internal verify stage.
+
+Root cause: a lumen-build upda… || # lumen-build 4.2 (2026-03-30)
+
+    - Reverted the unified compression path: audio returns to its dedicated pass. See the March 2026 postmortem.
+- Verify stage now measures the final inlined artifact instead of the pre-inline bundle.
+- Stag…",0.8333,ragas,5325,True,0.5,True,eval-hybrid_a0.5_rerank
+20260810T144606Z,2026-08-10T14:52:39.057691+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5_rerank,recursive,True,0.5,True,4,What caused the March 2026 AppLovin rejections and what was fixed?,False,incident-postmortem-2026-03.md,"The March 2026 AppLovin rejections were caused by a lumen-build update that changed the order of the compress and inline stages, resulting in audio being compressed with textures instead of in its dedicated pass. This caused audio-heavy playables to exceed the 5 MB limit on the network side. The fixes included measuring the final inlined artifact during the verify stage, pinning the stage order in CI, and implementing a regression test that builds the three heaviest historical playables on every pipeline change.",True,[1] incident-postmortem-2026-03.md | [2] changelogs/lumen-build-4.2.md,incident-postmortem-2026-03.md | changelogs/lumen-build-4.2.md | network-specs-applovin.md | postmortems/2025-11-analytics-leak.md | delivery-reports/2025-12-merge-marina.md,5,"# Postmortem: March 2026 Delivery Incident
+
+In March 2026 (fictional), eleven AppLovin deliveries were rejected in one week for exceeding the 5 MB single-file limit, despite passing the internal verify stage.
+
+Root cause: a lumen-build upda… || # lumen-build 4.2 (2026-03-30)
+
+    - Reverted the unified compression path: audio returns to its dedicated pass. See the March 2026 postmortem.
+- Verify stage now measures the final inlined artifact instead of the pre-inline bundle.
+- Stag… || # Network Specs: AppLovin
+
+AppLovin playables at Lumen ship as a single self-contained HTML file. All assets are inlined (base64) and no external network requests are allowed at runtime.
+
+Hard limits:
+- Maximum file size: 5 MB for the final…",1.0,ragas,5993,True,0.5,True,eval-hybrid_a0.5_rerank
+20260810T144606Z,2026-08-10T14:52:48.835349+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5_rerank,recursive,True,0.5,True,5,"Which languages must every playable ship with, and what is the fallback?",False,localization-guide.md,"Every playable ship must include the following minimum languages: English, Spanish, Portuguese, German, French, Japanese, and Korean. If language detection fails or the locale is unsupported, English serves as the fallback language.",True,[1] localization-guide.md,localization-guide.md | qa-checklist.md | network-specs-unity-meta.md | playable-brief-guidelines.md | sdk-notes-v2.md,5,"# Localization Guide
+
+Every Lumen playable ships with a minimum language set: English, Spanish, Portuguese, German, French, Japanese and Korean. Clients can add languages, never remove from the minimum set.
+
+Language is auto-detected from t… || # Pre-Delivery QA Checklist
+
+Run before every client delivery, no exceptions:
+
+1. Size check per target network (see network spec docs).
+2. First interaction reachable within 3 seconds.
+3. No outbound requests in AppLovin builds; analytics … || # Network Specs: Unity and Meta
+
+Unity playables ship as a ZIP archive with an index.html entry point. The archive limit is 5 MB, and up to 10 MB after unzip. Unity requires the mraid.js reference to stay in the head of the document.
+
+Meta …",1.0,ragas,4619,True,0.5,True,eval-hybrid_a0.5_rerank
+20260810T144606Z,2026-08-10T14:52:56.217626+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5_rerank,recursive,True,0.5,True,6,What is the company vacation policy and salary bands for playable engineers?,True,,I cannot find the answer in the corpus.,False,,company-overview.md | onboarding-new-dev.md | guides/review-process.md | network-specs-unity-meta.md | meeting-notes/2025-12-01-production-sync.md,5,"# Lumen Playables: Company Overview
+
+Lumen Playables is a fictional interactive ad studio founded in 2019, headquartered in Lisbon with a remote production team across Europe. The studio builds HTML5 playable ads for mobile game and app cli… || # Onboarding: New Developer
+
+Week 1: environment setup, lumen-build access, and a shadow delivery with your pod. Every new developer rebuilds one past playable from its brief as a training exercise; the result is reviewed by the pod's senio… || # Creative Review Process
+
+Every playable passes two internal reviews before client delivery: a design review at the
+first playable build, and a delivery review after QA. The delivery review is run by a developer
+from a different pod, never…",1.0,refusal_proxy,3814,True,0.5,True,eval-hybrid_a0.5_rerank
+20260810T144606Z,2026-08-10T14:53:12.535568+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5_rerank,recursive,True,0.5,True,7,How many paid parental leave weeks do contractors get at Playable Factory?,True,,I cannot find the answer in the corpus.,False,,onboarding-new-dev.md | company-overview.md | sdk-notes-v2.md | guides/review-process.md | meeting-notes/2025-06-02-production-sync.md,5,"# Onboarding: New Developer
+
+Week 1: environment setup, lumen-build access, and a shadow delivery with your pod. Every new developer rebuilds one past playable from its brief as a training exercise; the result is reviewed by the pod's senio… || # Lumen Playables: Company Overview
+
+Lumen Playables is a fictional interactive ad studio founded in 2019, headquartered in Lisbon with a remote production team across Europe. The studio builds HTML5 playable ads for mobile game and app cli… || # Lumen SDK v2 (DEPRECATED)
+
+Status: deprecated since January 2026. Do not use for new playables. Kept for maintenance of legacy projects only. See ""Lumen SDK v3"" for current guidance.
+
+In v2, a playable initializes the SDK by calling lumen…",1.0,refusal_proxy,3961,True,0.5,True,eval-hybrid_a0.5_rerank
+20260810T144606Z,2026-08-10T14:53:25.388422+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5_rerank,recursive,True,0.5,True,8,What is the internal stock option strike price for 2024 grants?,True,,I cannot find the answer in the corpus.,False,,changelogs/lumen-build-4.3.md | postmortems/2025-11-analytics-leak.md | delivery-reports/2025-07-orbit-golf.md | incident-postmortem-2026-03.md | client-briefs/orbit-golf.md,5,"# lumen-build 4.3 (2026-05-25)
+
+    - Verify stage: added outbound-request scan for all networks, not only AppLovin.
+- Export: deterministic asset ordering for reproducible builds. || # Postmortem: November 2025 Analytics Leak
+
+One AppLovin build was rejected for an outbound request. Root cause: a debug flag left enabled made the analytics buffer flush to the staging endpoint at runtime, bypassing the export-time strip.
+… || # Delivery Report: Orbit Golf, 2025-07
+
+Client: Northlight Games. Target network this cycle: Meta. Developers: Viktor, Dilek.
+
+## QA findings and fixes
+- Coin counter overlapped the notch in landscape on tall screens; safe-area padding adde…",1.0,refusal_proxy,9938,True,0.5,True,eval-hybrid_a0.5_rerank
+20260810T144606Z,2026-08-10T14:53:34.352284+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5_rerank,recursive,True,0.5,True,9,Which coffee brand is stocked in the Istanbul office kitchen?,True,,I cannot find the answer in the corpus.,False,,meeting-notes/2026-02-09-production-sync.md | style-guide-ui.md | client-briefs/sky-ferry.md | meeting-notes/2025-06-16-production-sync.md | meeting-notes/2026-05-18-production-sync.md,5,"# Production Sync, 2026-02-09
+
+Facilitator: Deniz. Pods present: Nova, Orbit, Flare.
+
+## Delivery status
+- Sky Ferry (Grimwood Labs): awaiting client feedback. Focus this week: tutorial pacing.
+- Bubble Bakery (Pocket Comet): export stage. … || # UI Style Guide
+
+Buttons: a playable has exactly one primary CTA visible at a time. The CTA uses the client brand color; if contrast against the background is below 4.5:1, add the standard dark scrim behind it.
+
+Text: system font stack onl… || # Client Brief: Sky Ferry (Pocket Comet)
+
+Genre: arcade. Target networks: Mintegral and AppLovin.
+
+Goal: a short interactive ad showcasing the core arcade loop. Tone: energetic and gritty.
+Audience: mid-core players 18-34.
+
+Must-haves: clie…",1.0,refusal_proxy,3742,True,0.5,True,eval-hybrid_a0.5_rerank
+20260810T144606Z,2026-08-10T14:53:40.445467+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5_rerank,recursive,True,0.5,True,10,What is the CEO's personal mobile phone number?,True,,I cannot find the answer in the corpus.,False,,delivery-reports/2025-05-tidal-tycoon.md | company-overview.md | delivery-reports/2026-05-tidal-tycoon.md | delivery-reports/2025-12-merge-marina.md | delivery-reports/2025-11-merge-marina.md,5,"# Delivery Report: Tidal Tycoon, 2025-05
+
+Client: Tandem Toys. Target network this cycle: AppLovin. Developers: Elif, Ana.
+
+## QA findings and fixes
+- Coin counter overlapped the notch in landscape on tall screens; safe-area padding added.
+… || # Lumen Playables: Company Overview
+
+Lumen Playables is a fictional interactive ad studio founded in 2019, headquartered in Lisbon with a remote production team across Europe. The studio builds HTML5 playable ads for mobile game and app cli… || # Delivery Report: Tidal Tycoon, 2026-05
+
+Client: Tandem Toys. Target network this cycle: AppLovin. Developers: Elif, Ana.
+
+## QA findings and fixes
+- Orientation switch during the fail popup misplaced the retry button; layout re-anchored.
+…",1.0,refusal_proxy,3288,True,0.5,True,eval-hybrid_a0.5_rerank
+20260810T144606Z,2026-08-10T14:53:47.235041+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5_rerank,recursive,True,0.5,True,11,What is the release date of lumen-build 4.0?,False,changelogs/lumen-build-4.0.md,"The release date of lumen-build 4.0 is October 13, 2025.",True,[1] changelogs/lumen-build-4.0.md,changelogs/lumen-build-4.0.md | sdk-notes-v2.md | changelogs/lumen-build-4.3.md | build-pipeline.md | changelogs/lumen-build-4.2.md,5,"# lumen-build 4.0 (2025-10-13)
+
+    - New plugin system for export post-processing.
+- Dropped Node 16 support. || # Lumen SDK v2 (DEPRECATED)
+
+Status: deprecated since January 2026. Do not use for new playables. Kept for maintenance of legacy projects only. See ""Lumen SDK v3"" for current guidance.
+
+In v2, a playable initializes the SDK by calling lumen… || # lumen-build 4.3 (2026-05-25)
+
+    - Verify stage: added outbound-request scan for all networks, not only AppLovin.
+- Export: deterministic asset ordering for reproducible builds.",1.0,ragas,3554,True,0.5,True,eval-hybrid_a0.5_rerank
+20260810T144606Z,2026-08-10T14:53:54.580563+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5_rerank,recursive,True,0.5,True,12,What major support was dropped in lumen-build 4.0?,False,changelogs/lumen-build-4.0.md,Node 16 support was dropped in lumen-build 4.0.,True,[1] changelogs/lumen-build-4.0.md,changelogs/lumen-build-4.0.md | changelogs/lumen-build-4.2.md | changelogs/lumen-build-4.1.md | changelogs/lumen-build-4.3.md | changelogs/lumen-build-3.9.md,5,"# lumen-build 4.0 (2025-10-13)
+
+    - New plugin system for export post-processing.
+- Dropped Node 16 support. || # lumen-build 4.2 (2026-03-30)
+
+    - Reverted the unified compression path: audio returns to its dedicated pass. See the March 2026 postmortem.
+- Verify stage now measures the final inlined artifact instead of the pre-inline bundle.
+- Stag… || # lumen-build 4.1 (2026-02-16)
+
+    - Unified compression path for all asset classes to simplify the pipeline. Audio now flows through the shared compressor.
+- Faster incremental bundles.",1.0,ragas,4310,True,0.5,True,eval-hybrid_a0.5_rerank
+20260810T144606Z,2026-08-10T14:54:01.689721+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5_rerank,recursive,True,0.5,True,13,What date was the lumen-build 3.9 released?,False,changelogs/lumen-build-3.9.md,"The lumen-build 3.9 was released on June 30, 2025.",True,[1] changelogs/lumen-build-3.9.md,changelogs/lumen-build-3.9.md | changelogs/lumen-build-4.0.md | sdk-notes-v3.md | changelogs/lumen-build-3.8.md | changelogs/lumen-build-4.1.md,5,"# lumen-build 3.9 (2025-06-30)
+
+    - Per-network export profiles consolidated; --network flag now validates against supported list.
+- Verify stage reports size per asset class. || # lumen-build 4.0 (2025-10-13)
+
+    - New plugin system for export post-processing.
+- Dropped Node 16 support. || # Lumen SDK v3 (current)
+
+v3 is the current SDK for all new playables, mandatory since January 2026. It supersedes v2 and is not backward compatible.
+
+Initialization: call LumenSDK.init(config) before any game code runs; init returns a prom…",1.0,ragas,3417,True,0.5,True,eval-hybrid_a0.5_rerank
+20260810T144606Z,2026-08-10T14:54:15.448364+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5_rerank,recursive,True,0.5,True,14,What change was made regarding the --network flag in lumen-build 3.9?,False,changelogs/lumen-build-3.9.md,"In lumen-build 3.9, the --network flag was updated to validate against a supported list of per-network export profiles.",True,[1] changelogs/lumen-build-3.9.md,changelogs/lumen-build-3.9.md | build-pipeline.md | changelogs/lumen-build-4.3.md | postmortems/2025-11-analytics-leak.md | changelogs/lumen-build-4.2.md,5,"# lumen-build 3.9 (2025-06-30)
+
+    - Per-network export profiles consolidated; --network flag now validates against supported list.
+- Verify stage reports size per asset class. || # Build Pipeline
+
+Lumen builds run through the internal CLI, lumen-build, maintained by the Platform team.
+
+The pipeline has four stages: bundle, compress, inline, verify. The verify stage runs the same checks as network QA bots (size, forb… || # lumen-build 4.3 (2026-05-25)
+
+    - Verify stage: added outbound-request scan for all networks, not only AppLovin.
+- Export: deterministic asset ordering for reproducible builds.",0.5,ragas,5416,True,0.5,True,eval-hybrid_a0.5_rerank
+20260810T144606Z,2026-08-10T14:54:26.981066+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5_rerank,recursive,True,0.5,True,15,What new feature was added to the verify stage in lumen-build 4.3?,False,changelogs/lumen-build-4.3.md,"The new feature added to the verify stage in lumen-build 4.3 is an outbound-request scan for all networks, not only AppLovin.",True,[1] changelogs/lumen-build-4.3.md,changelogs/lumen-build-4.3.md | changelogs/lumen-build-4.2.md | changelogs/lumen-build-3.8.md | build-pipeline.md | changelogs/lumen-build-3.9.md,5,"# lumen-build 4.3 (2026-05-25)
+
+    - Verify stage: added outbound-request scan for all networks, not only AppLovin.
+- Export: deterministic asset ordering for reproducible builds. || # lumen-build 4.2 (2026-03-30)
+
+    - Reverted the unified compression path: audio returns to its dedicated pass. See the March 2026 postmortem.
+- Verify stage now measures the final inlined artifact instead of the pre-inline bundle.
+- Stag… || # lumen-build 3.8 (2025-04-14)
+
+    - Added glyph coverage check for Japanese and Korean to the verify stage.
+- Compression: texture atlas packing improved, average 6 percent size reduction.",1.0,ragas,4659,True,0.5,True,eval-hybrid_a0.5_rerank
+20260810T144606Z,2026-08-10T14:54:35.404789+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5_rerank,recursive,True,0.5,True,16,What date was the lumen-build 4.3 released?,False,changelogs/lumen-build-4.3.md,"The lumen-build 4.3 was released on May 25, 2026.",True,[1] changelogs/lumen-build-4.3.md,changelogs/lumen-build-4.3.md | changelogs/lumen-build-4.0.md | changelogs/lumen-build-4.1.md | sdk-notes-v2.md | changelogs/lumen-build-4.2.md,5,"# lumen-build 4.3 (2026-05-25)
+
+    - Verify stage: added outbound-request scan for all networks, not only AppLovin.
+- Export: deterministic asset ordering for reproducible builds. || # lumen-build 4.0 (2025-10-13)
+
+    - New plugin system for export post-processing.
+- Dropped Node 16 support. || # lumen-build 4.1 (2026-02-16)
+
+    - Unified compression path for all asset classes to simplify the pipeline. Audio now flows through the shared compressor.
+- Faster incremental bundles.",1.0,ragas,5097,True,0.5,True,eval-hybrid_a0.5_rerank
+20260810T144606Z,2026-08-10T14:55:01.568819+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5_rerank,recursive,True,0.5,True,17,What date was the lumen-build 4.1 released?,False,changelogs/lumen-build-4.1.md,"The lumen-build 4.1 was released on February 16, 2026.",True,[1] changelogs/lumen-build-4.1.md,changelogs/lumen-build-4.1.md | changelogs/lumen-build-4.0.md | changelogs/lumen-build-4.3.md | sdk-notes-v2.md | changelogs/lumen-build-4.2.md,5,"# lumen-build 4.1 (2026-02-16)
+
+    - Unified compression path for all asset classes to simplify the pipeline. Audio now flows through the shared compressor.
+- Faster incremental bundles. || # lumen-build 4.0 (2025-10-13)
+
+    - New plugin system for export post-processing.
+- Dropped Node 16 support. || # lumen-build 4.3 (2026-05-25)
+
+    - Verify stage: added outbound-request scan for all networks, not only AppLovin.
+- Export: deterministic asset ordering for reproducible builds.",1.0,ragas,3671,True,0.5,True,eval-hybrid_a0.5_rerank
+20260810T144606Z,2026-08-10T14:55:12.609496+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5_rerank,recursive,True,0.5,True,18,What change was made to the compression path in lumen-build 4.1?,False,changelogs/lumen-build-4.1.md,"In lumen-build 4.1, the change made to the compression path was the unification of the compression path for all asset classes, allowing audio to flow through the shared compressor instead of having a dedicated pass.",True,[1] changelogs/lumen-build-4.1.md,changelogs/lumen-build-4.1.md | changelogs/lumen-build-4.2.md | incident-postmortem-2026-03.md | build-pipeline.md | changelogs/lumen-build-3.8.md,5,"# lumen-build 4.1 (2026-02-16)
+
+    - Unified compression path for all asset classes to simplify the pipeline. Audio now flows through the shared compressor.
+- Faster incremental bundles. || # lumen-build 4.2 (2026-03-30)
+
+    - Reverted the unified compression path: audio returns to its dedicated pass. See the March 2026 postmortem.
+- Verify stage now measures the final inlined artifact instead of the pre-inline bundle.
+- Stag… || # Postmortem: March 2026 Delivery Incident
+
+In March 2026 (fictional), eleven AppLovin deliveries were rejected in one week for exceeding the 5 MB single-file limit, despite passing the internal verify stage.
+
+Root cause: a lumen-build upda…",0.6667,ragas,4578,True,0.5,True,eval-hybrid_a0.5_rerank
+20260810T144606Z,2026-08-10T14:55:21.608159+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5_rerank,recursive,True,0.5,True,19,What new feature was added to the verify stage in lumen-build 3.8?,False,changelogs/lumen-build-3.8.md,The new feature added to the verify stage in lumen-build 3.8 is a glyph coverage check for Japanese and Korean.,True,[1] changelogs/lumen-build-3.8.md,changelogs/lumen-build-3.8.md | changelogs/lumen-build-4.3.md | changelogs/lumen-build-4.2.md | changelogs/lumen-build-3.9.md | build-pipeline.md,5,"# lumen-build 3.8 (2025-04-14)
+
+    - Added glyph coverage check for Japanese and Korean to the verify stage.
+- Compression: texture atlas packing improved, average 6 percent size reduction. || # lumen-build 4.3 (2026-05-25)
+
+    - Verify stage: added outbound-request scan for all networks, not only AppLovin.
+- Export: deterministic asset ordering for reproducible builds. || # lumen-build 4.2 (2026-03-30)
+
+    - Reverted the unified compression path: audio returns to its dedicated pass. See the March 2026 postmortem.
+- Verify stage now measures the final inlined artifact instead of the pre-inline bundle.
+- Stag…",1.0,ragas,4252,True,0.5,True,eval-hybrid_a0.5_rerank
+20260810T144606Z,2026-08-10T14:55:29.184121+00:00,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5_rerank,recursive,True,0.5,True,20,What is the average size reduction achieved in texture atlas packing in lumen-build 3.8?,False,changelogs/lumen-build-3.8.md,The average size reduction achieved in texture atlas packing in lumen-build 3.8 is 6 percent.,True,[1] changelogs/lumen-build-3.8.md,changelogs/lumen-build-3.8.md | changelogs/lumen-build-4.1.md | changelogs/lumen-build-4.2.md | guides/asset-naming.md | build-pipeline.md,5,"# lumen-build 3.8 (2025-04-14)
+
+    - Added glyph coverage check for Japanese and Korean to the verify stage.
+- Compression: texture atlas packing improved, average 6 percent size reduction. || # lumen-build 4.1 (2026-02-16)
+
+    - Unified compression path for all asset classes to simplify the pipeline. Audio now flows through the shared compressor.
+- Faster incremental bundles. || # lumen-build 4.2 (2026-03-30)
+
+    - Reverted the unified compression path: audio returns to its dedicated pass. See the March 2026 postmortem.
+- Verify stage now measures the final inlined artifact instead of the pre-inline bundle.
+- Stag…",1.0,ragas,4136,True,0.5,True,eval-hybrid_a0.5_rerank

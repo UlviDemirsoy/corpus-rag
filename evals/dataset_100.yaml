@@ -1,0 +1,305 @@
+# Auto-generated faithfulness eval set (~100).
+# Style matches data/sample_questions.md — grounded Qs + ungrounded probes.
+queries:
+  - question: "What is the maximum file size for an AppLovin playable, and how does it ship?"
+    expect_sources:
+      - "network-specs-applovin.md"
+  - question: "How do I initialize the current Lumen SDK, and what happened to lumen.track?"
+    expect_sources:
+      - "sdk-notes-v3.md"
+    notes: "sdk-notes-v2.md is deprecated; a good answer says so"
+  - question: "Why are sound assets built in a separate pass?"
+    expect_sources:
+      - "build-pipeline.md"
+      - "incident-postmortem-2026-03.md"
+  - question: "What caused the March 2026 AppLovin rejections and what was fixed?"
+    expect_sources:
+      - "incident-postmortem-2026-03.md"
+  - question: "Which languages must every playable ship with, and what is the fallback?"
+    expect_sources:
+      - "localization-guide.md"
+  - question: "What is the company vacation policy and salary bands for playable engineers?"
+    expect_sources: []
+    expect_ungrounded: true
+  - question: "How many paid parental leave weeks do contractors get at Playable Factory?"
+    expect_sources: []
+    expect_ungrounded: true
+  - question: "What is the internal stock option strike price for 2024 grants?"
+    expect_sources: []
+    expect_ungrounded: true
+  - question: "Which coffee brand is stocked in the Istanbul office kitchen?"
+    expect_sources: []
+    expect_ungrounded: true
+  - question: "What is the CEO's personal mobile phone number?"
+    expect_sources: []
+    expect_ungrounded: true
+  - question: "What is the release date of lumen-build 4.0?"
+    expect_sources:
+      - "changelogs/lumen-build-4.0.md"
+  - question: "What major support was dropped in lumen-build 4.0?"
+    expect_sources:
+      - "changelogs/lumen-build-4.0.md"
+  - question: "What date was the lumen-build 3.9 released?"
+    expect_sources:
+      - "changelogs/lumen-build-3.9.md"
+  - question: "What change was made regarding the --network flag in lumen-build 3.9?"
+    expect_sources:
+      - "changelogs/lumen-build-3.9.md"
+  - question: "What new feature was added to the verify stage in lumen-build 4.3?"
+    expect_sources:
+      - "changelogs/lumen-build-4.3.md"
+  - question: "What date was the lumen-build 4.3 released?"
+    expect_sources:
+      - "changelogs/lumen-build-4.3.md"
+  - question: "What date was the lumen-build 4.1 released?"
+    expect_sources:
+      - "changelogs/lumen-build-4.1.md"
+  - question: "What change was made to the compression path in lumen-build 4.1?"
+    expect_sources:
+      - "changelogs/lumen-build-4.1.md"
+  - question: "What new feature was added to the verify stage in lumen-build 3.8?"
+    expect_sources:
+      - "changelogs/lumen-build-3.8.md"
+  - question: "What is the average size reduction achieved in texture atlas packing in lumen-build 3.8?"
+    expect_sources:
+      - "changelogs/lumen-build-3.8.md"
+  - question: "What change was made regarding the audio compression path in lumen-build 4.2?"
+    expect_sources:
+      - "changelogs/lumen-build-4.2.md"
+  - question: "When was the lumen-build 4.2 released?"
+    expect_sources:
+      - "changelogs/lumen-build-4.2.md"
+  - question: "Who owns communication during an incident?"
+    expect_sources:
+      - "guides/incident-process.md"
+  - question: "Within how many business days must a postmortem be closed after an incident?"
+    expect_sources:
+      - "guides/incident-process.md"
+  - question: "What is the target audience age range for the Waffle Rush game?"
+    expect_sources:
+      - "client-briefs/waffle-rush.md"
+  - question: "What is the maximum delivery time for the project after brief approval?"
+    expect_sources:
+      - "client-briefs/waffle-rush.md"
+  - question: "What is the target audience age range for the Gloom Garden interactive ad?"
+    expect_sources:
+      - "client-briefs/gloom-garden.md"
+  - question: "What is the delivery timeline for the Gloom Garden project after brief approval?"
+    expect_sources:
+      - "client-briefs/gloom-garden.md"
+  - question: "What is the target audience age range for the Rooftop Dash game?"
+    expect_sources:
+      - "client-briefs/rooftop-dash.md"
+  - question: "What is the target audience age range for the Sky Ferry interactive ad?"
+    expect_sources:
+      - "client-briefs/sky-ferry.md"
+  - question: "What is the delivery timeline for the project after brief approval?"
+    expect_sources:
+      - "client-briefs/sky-ferry.md"
+  - question: "What is the target audience age range for the interactive ad?"
+    expect_sources:
+      - "client-briefs/merge-marina.md"
+  - question: "What is the target audience age range for the Puzzle Pier ad?"
+    expect_sources:
+      - "client-briefs/puzzle-pier.md"
+  - question: "What is the target audience age range for the Orbit Golf ad?"
+    expect_sources:
+      - "client-briefs/orbit-golf.md"
+  - question: "What is the target audience age range for the Cinder Keep game?"
+    expect_sources:
+      - "client-briefs/cinder-keep.md"
+  - question: "What is the delivery time frame for the project after brief approval?"
+    expect_sources:
+      - "client-briefs/cinder-keep.md"
+  - question: "What is the delivery timeline for the Bubble Bakery ad after brief approval?"
+    expect_sources:
+      - "client-briefs/bubble-bakery.md"
+  - question: "What is the target audience age range for the Bubble Bakery ad?"
+    expect_sources:
+      - "client-briefs/bubble-bakery.md"
+  - question: "What is the target audience age range for the Tidal Tycoon ad?"
+    expect_sources:
+      - "client-briefs/tidal-tycoon.md"
+  - question: "How long is the delivery scope for the Tidal Tycoon project after brief approval?"
+    expect_sources:
+      - "client-briefs/tidal-tycoon.md"
+  - question: "What method is used to initialize the Lumen SDK v2?"
+    expect_sources:
+      - "sdk-notes-v2.md"
+  - question: "When was Lumen SDK v2 deprecated?"
+    expect_sources:
+      - "sdk-notes-v2.md"
+  - question: "What was the root cause of the AppLovin build rejection in November 2025?"
+    expect_sources:
+      - "postmortems/2025-11-analytics-leak.md"
+  - question: "What fix was implemented to prevent the analytics buffer from flushing to the staging endpoint?"
+    expect_sources:
+      - "postmortems/2025-11-analytics-leak.md"
+  - question: "What are the minimum languages that every Lumen playable ships with?"
+    expect_sources:
+      - "localization-guide.md"
+  - question: "What happens if the device locale is unsupported during language detection?"
+    expect_sources:
+      - "localization-guide.md"
+  - question: "What issue occurred with the deliveries in July 2025 regarding Korean glyphs?"
+    expect_sources:
+      - "postmortems/2025-07-localization-regression.md"
+  - question: "What changes were made to the QA checklist after the localization regression issue?"
+    expect_sources:
+      - "postmortems/2025-07-localization-regression.md"
+  - question: "What is the maximum file size allowed for the final single HTML file in AppLovin playables?"
+    expect_sources:
+      - "network-specs-applovin.md"
+  - question: "What must the end card CTA call in AppLovin playables?"
+    expect_sources:
+      - "network-specs-applovin.md"
+  - question: "What method should be called to initialize the Lumen SDK v3 before any game code runs?"
+    expect_sources:
+      - "sdk-notes-v3.md"
+  - question: "What replaces the old lumen.track calls from v2 in Lumen SDK v3?"
+    expect_sources:
+      - "sdk-notes-v3.md"
+  - question: "What is the maximum size limit for a Unity playable ZIP archive?"
+    expect_sources:
+      - "network-specs-unity-meta.md"
+  - question: "What is the load time requirement for Meta playables on a mid-range device?"
+    expect_sources:
+      - "network-specs-unity-meta.md"
+  - question: "What is the primary engagement metric measured from the load_complete event to the first_interaction event?"
+    expect_sources:
+      - "analytics-events.md"
+  - question: "What prefix is used for custom events in Lumen playables?"
+    expect_sources:
+      - "analytics-events.md"
+  - question: "How many playables does Lumen deliver per month?"
+    expect_sources:
+      - "company-overview.md"
+  - question: "What is the standard delivery time for a new concept after brief approval?"
+    expect_sources:
+      - "company-overview.md"
+  - question: "What are the four stages of the Lumen build pipeline?"
+    expect_sources:
+      - "build-pipeline.md"
+  - question: "What command is used to export a single-file build for the AppLovin network?"
+    expect_sources:
+      - "build-pipeline.md"
+  - question: "How many AppLovin deliveries were rejected in March 2026 for exceeding the file size limit?"
+    expect_sources:
+      - "incident-postmortem-2026-03.md"
+  - question: "What was the maximum size limit for single-file deliveries that caused the rejections?"
+    expect_sources:
+      - "incident-postmortem-2026-03.md"
+  - question: "How many internal reviews does every playable pass before client delivery?"
+    expect_sources:
+      - "guides/review-process.md"
+  - question: "Who conducts the delivery review for a playable?"
+    expect_sources:
+      - "guides/review-process.md"
+  - question: "What is the naming convention for assets as mentioned in the document?"
+    expect_sources:
+      - "guides/asset-naming.md"
+  - question: "Where should audio files be located according to the asset naming conventions?"
+    expect_sources:
+      - "guides/asset-naming.md"
+  - question: "What is the focus for Rooftop Dash this week?"
+    expect_sources:
+      - "meeting-notes/2025-05-05-production-sync.md"
+  - question: "When is the planned maintenance for the Staging CDN?"
+    expect_sources:
+      - "meeting-notes/2025-05-05-production-sync.md"
+  - question: "What is the focus for Tidal Tycoon this week?"
+    expect_sources:
+      - "meeting-notes/2025-09-22-production-sync.md"
+  - question: "What is the focus for Orbit Golf this week?"
+    expect_sources:
+      - "meeting-notes/2025-03-17-production-sync.md"
+  - question: "What was delivered by Puzzle Pier and what note was made regarding it?"
+    expect_sources:
+      - "meeting-notes/2025-03-17-production-sync.md"
+  - question: "What was the focus for Gloom Garden during the iteration round 2?"
+    expect_sources:
+      - "meeting-notes/2025-09-08-production-sync.md"
+  - question: "What is the focus for Gloom Garden this week?"
+    expect_sources:
+      - "meeting-notes/2025-03-03-production-sync.md"
+  - question: "What is the focus for Bubble Bakery in the current iteration round?"
+    expect_sources:
+      - "meeting-notes/2025-04-21-production-sync.md"
+  - question: "What is the delivery status of Orbit Golf as of June 16, 2025?"
+    expect_sources:
+      - "meeting-notes/2025-06-16-production-sync.md"
+  - question: "What is the focus for Rooftop Dash during iteration round 2?"
+    expect_sources:
+      - "meeting-notes/2025-04-07-production-sync.md"
+  - question: "What is the current delivery status of Gloom Garden?"
+    expect_sources:
+      - "meeting-notes/2025-05-19-production-sync.md"
+  - question: "What must be shown for any playable that is longer than 20 seconds?"
+    expect_sources:
+      - "style-guide-ui.md"
+  - question: "What is the delivery status of Orbit Golf (Pocket Comet) as of July 7, 2025?"
+    expect_sources:
+      - "meeting-notes/2025-07-07-production-sync.md"
+  - question: "What is the focus for Gloom Garden during iteration round 2?"
+    expect_sources:
+      - "meeting-notes/2025-07-21-production-sync.md"
+  - question: "What is the delivery status of Gloom Garden as of June 2, 2025?"
+    expect_sources:
+      - "meeting-notes/2025-06-02-production-sync.md"
+  - question: "What is the scope limit for a new developer's first real ticket during Week 2?"
+    expect_sources:
+      - "onboarding-new-dev.md"
+  - question: "What is the status of Waffle Rush as of May 18, 2026?"
+    expect_sources:
+      - "meeting-notes/2026-05-18-production-sync.md"
+  - question: "What is the delivery status of Rooftop Dash as of January 12, 2026?"
+    expect_sources:
+      - "meeting-notes/2026-01-12-production-sync.md"
+  - question: "What is the status of the Sky Ferry project as of April 20, 2026?"
+    expect_sources:
+      - "meeting-notes/2026-04-20-production-sync.md"
+  - question: "What is the focus for the Orbit Golf team this week?"
+    expect_sources:
+      - "meeting-notes/2026-01-26-production-sync.md"
+  - question: "What is the status of the Gloom Garden project as of June 15, 2026?"
+    expect_sources:
+      - "meeting-notes/2026-06-15-production-sync.md"
+  - question: "What happens if any item on the pre-delivery QA checklist fails?"
+    expect_sources:
+      - "qa-checklist.md"
+  - question: "What is the focus for Puzzle Pier this week?"
+    expect_sources:
+      - "meeting-notes/2025-12-15-production-sync.md"
+  - question: "What is the current status of the Sky Ferry project as of February 9, 2026?"
+    expect_sources:
+      - "meeting-notes/2026-02-09-production-sync.md"
+  - question: "What is the status of the Cinder Keep project as of April 6, 2026?"
+    expect_sources:
+      - "meeting-notes/2026-04-06-production-sync.md"
+  - question: "What is the status of Rooftop Dash as of February 23, 2026?"
+    expect_sources:
+      - "meeting-notes/2026-02-23-production-sync.md"
+  - question: "What is the focus for Bubble Bakery this week?"
+    expect_sources:
+      - "meeting-notes/2026-06-01-production-sync.md"
+  - question: "What is the focus for Waffle Rush this week?"
+    expect_sources:
+      - "meeting-notes/2025-11-17-production-sync.md"
+  - question: "What is the delivery status of the game Tidal Tycoon?"
+    expect_sources:
+      - "meeting-notes/2025-12-01-production-sync.md"
+  - question: "What is the focus for Bubble Bakery during iteration round 2 this week?"
+    expect_sources:
+      - "meeting-notes/2025-11-03-production-sync.md"
+  - question: "What are the two non-negotiable rules at Lumen regarding playable briefs?"
+    expect_sources:
+      - "playable-brief-guidelines.md"
+  - question: "What was the fail-to-retry conversion rate across all tested devices?"
+    expect_sources:
+      - "delivery-reports/2025-10-waffle-rush.md"
+  - question: "What was the time to first interaction before the asset preloading changes?"
+    expect_sources:
+      - "delivery-reports/2025-06-orbit-golf.md"
+  - question: "What was the cta_click percentage change after the cta copy change?"
+    expect_sources:
+      - "delivery-reports/2025-09-bubble-bakery.md"

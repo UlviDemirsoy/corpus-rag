@@ -17,5 +17,7 @@ export interface VectorStore {
     embedding: number[],
     topK: number,
   ): Promise<ScoredChunk[]>;
+  /** All chunk payloads for a strategy (for lexical / BM25). */
+  listChunks(strategy: ChunkStrategy): Promise<ScoredChunk[]>;
   getHealth(strategy: ChunkStrategy): Promise<IndexHealth>;
 }

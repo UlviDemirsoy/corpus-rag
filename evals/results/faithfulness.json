@@ -1,9 +1,57 @@
 {
   "metric": "faithfulness",
-  "note": "Run `python evals/run_faithfulness.py` after ingesting the corpus with a valid OPENAI_API_KEY to populate real scores.",
+  "run_id": "20260810T144606Z",
+  "api": "http://localhost:3001",
+  "dataset": "C:\\Users\\Ulvi\\Desktop\\playablefactory\\evals\\dataset_100.yaml",
+  "chat_model": "gpt-4o-mini",
+  "embedding_model": "text-embedding-3-small",
+  "top_k": 5,
+  "used_ragas": true,
   "rows": [
-    { "strategy": "fixed", "faithfulness": null, "n": 0 },
-    { "strategy": "recursive", "faithfulness": null, "n": 0 },
-    { "strategy": "sliding", "faithfulness": null, "n": 0 }
-  ]
+    {
+      "run_id": "20260810T144606Z",
+      "chat_model": "gpt-4o-mini",
+      "embedding_model": "text-embedding-3-small",
+      "top_k": 5,
+      "setting": "dense",
+      "strategy": "recursive",
+      "use_hybrid": false,
+      "hybrid_alpha": null,
+      "use_rerank": false,
+      "faithfulness_avg": 0.9833,
+      "n": 20,
+      "used_ragas": true
+    },
+    {
+      "run_id": "20260810T144606Z",
+      "chat_model": "gpt-4o-mini",
+      "embedding_model": "text-embedding-3-small",
+      "top_k": 5,
+      "setting": "hybrid_a0.5",
+      "strategy": "recursive",
+      "use_hybrid": true,
+      "hybrid_alpha": 0.5,
+      "use_rerank": false,
+      "faithfulness_avg": 1.0,
+      "n": 20,
+      "used_ragas": true
+    },
+    {
+      "run_id": "20260810T144606Z",
+      "chat_model": "gpt-4o-mini",
+      "embedding_model": "text-embedding-3-small",
+      "top_k": 5,
+      "setting": "hybrid_a0.5_rerank",
+      "strategy": "recursive",
+      "use_hybrid": true,
+      "hybrid_alpha": 0.5,
+      "use_rerank": true,
+      "faithfulness_avg": 0.95,
+      "n": 20,
+      "used_ragas": true
+    }
+  ],
+  "csv_runs": "C:\\Users\\Ulvi\\Desktop\\playablefactory\\evals\\results\\faithfulness_runs_20260810T144606Z.csv",
+  "csv_summary": "C:\\Users\\Ulvi\\Desktop\\playablefactory\\evals\\results\\faithfulness_summary.csv",
+  "note": "Per-row outputs in CSV; ungrounded items use refusal scoring."
 }

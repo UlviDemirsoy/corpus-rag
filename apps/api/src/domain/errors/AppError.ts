@@ -85,6 +85,17 @@ export class NotFoundError extends AppError {
   }
 }
 
+export class ConflictError extends AppError {
+  constructor(detail = "Resource already exists") {
+    super({
+      status: 409,
+      title: "Conflict",
+      code: "CONFLICT",
+      detail,
+    });
+  }
+}
+
 export class ServiceUnavailableError extends AppError {
   constructor(detail = "A dependency is temporarily unavailable") {
     super({

@@ -1,0 +1,26 @@
+{
+  "source_csv": "C:\\Users\\Ulvi\\Desktop\\playablefactory\\evals\\results\\faithfulness_runs_20260810T144606Z.csv",
+  "chat_model": "gpt-4o-mini",
+  "embedding_model": "text-embedding-3-small",
+  "chart": "C:\\Users\\Ulvi\\Desktop\\playablefactory\\evals\\results\\charts\\faithfulness_by_setting.png",
+  "rows": [
+    {
+      "setting": "dense",
+      "n": 20,
+      "faithfulness_avg": 0.9833,
+      "latency_avg_ms": 2178.6
+    },
+    {
+      "setting": "hybrid_a0.5",
+      "n": 20,
+      "faithfulness_avg": 1.0,
+      "latency_avg_ms": 1570.7
+    },
+    {
+      "setting": "hybrid_a0.5_rerank",
+      "n": 20,
+      "faithfulness_avg": 0.95,
+      "latency_avg_ms": 4702.4
+    }
+  ]
+}

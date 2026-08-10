@@ -25,7 +25,12 @@ export function AppHeader({ user }: { user: User | null }) {
 
   const links = [
     { href: "/chat", label: "Chat" },
-    ...(user?.role === "admin" ? [{ href: "/dashboard", label: "Dashboard" }] : []),
+    ...(user?.role === "admin"
+      ? [
+          { href: "/dashboard", label: "Dashboard" },
+          { href: "/dashboard/users", label: "Users" },
+        ]
+      : []),
   ];
 
   return (
@@ -42,7 +47,7 @@ export function AppHeader({ user }: { user: User | null }) {
                 href={l.href}
                 className={cn(
                   "rounded-md px-3 py-1.5 text-sm",
-                  pathname.startsWith(l.href)
+                  (l.href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(l.href))
                     ? "bg-teal-50 text-teal-900"
                     : "text-slate-600 hover:bg-slate-100",
                 )}

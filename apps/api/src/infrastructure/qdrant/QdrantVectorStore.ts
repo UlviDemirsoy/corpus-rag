@@ -79,18 +79,50 @@ export class QdrantVectorStore implements VectorStore {
         with_payload: true,
       });
 
-      return (results.points ?? []).map((r) => {
-        const payload = (r.payload ?? {}) as Record<string, unknown>;
-        return {
-          chunkId: String(payload.chunkId ?? r.id),
-          documentId: String(payload.documentId ?? ""),
-          source: String(payload.source ?? ""),
-          text: String(payload.text ?? ""),
-          score: r.score ?? 0,
-          strategy,
-        };
-      });
+      return (results.points ?? []).map((r) => this.mapPoint(r, strategy));
     });
+  }
+
+  async listChunks(strategy: ChunkStrategy): Promise<ScoredChunk[]> {
+    const name = collectionName(strategy);
+    return withRetry(`qdrant.listChunks.${name}`, async () => {
+      const collections = await this.client.getCollections();
+      if (!collections.collections.some((c) => c.name === name)) return [];
+
+      const chunks: ScoredChunk[] = [];
+      let offset: string | number | Record<string, unknown> | null | undefined = undefined;
+
+      for (;;) {
+        const page = await this.client.scroll(name, {
+          limit: 256,
+          with_payload: true,
+          with_vector: false,
+          offset,
+        });
+        for (const point of page.points ?? []) {
+          chunks.push(this.mapPoint(point, strategy));
+        }
+        if (page.next_page_offset == null) break;
+        offset = page.next_page_offset as string | number | Record<string, unknown>;
+      }
+
+      return chunks;
+    });
+  }
+
+  private mapPoint(
+    r: { id?: unknown; score?: number; payload?: Record<string, unknown> | null },
+    strategy: ChunkStrategy,
+  ): ScoredChunk {
+    const payload = (r.payload ?? {}) as Record<string, unknown>;
+    return {
+      chunkId: String(payload.chunkId ?? r.id),
+      documentId: String(payload.documentId ?? ""),
+      source: String(payload.source ?? ""),
+      text: String(payload.text ?? ""),
+      score: r.score ?? 0,
+      strategy,
+    };
   }
 
   async getHealth(strategy: ChunkStrategy): Promise<IndexHealth> {

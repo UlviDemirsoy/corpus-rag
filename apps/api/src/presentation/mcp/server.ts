@@ -25,17 +25,37 @@ async function main() {
         .enum(["fixed", "recursive", "sliding"])
         .optional()
         .describe("Chunking strategy / collection to search"),
+      useRerank: z
+        .boolean()
+        .optional()
+        .describe("Over-fetch dense candidates and OpenAI-rerank before returning"),
+      useHybrid: z
+        .boolean()
+        .optional()
+        .describe("Blend dense vector scores with Okapi BM25 via hybridAlpha"),
+      hybridAlpha: z
+        .number()
+        .min(0)
+        .max(1)
+        .optional()
+        .describe("α in s = α·densê + (1−α)·BM25̂"),
     },
-    async ({ query, topK, strategy }) => {
+    async ({ query, topK, strategy, useRerank, useHybrid, hybridAlpha }) => {
       const traceId = randomUUID();
       return httpContext.run(
         { traceId, requestId: randomUUID(), path: "mcp:search", method: "MCP" },
         async () => {
-          logger.info({ query, topK, strategy, traceId }, "MCP search tool invoked");
+          logger.info(
+            { query, topK, strategy, useRerank, useHybrid, hybridAlpha, traceId },
+            "MCP search tool invoked",
+          );
           const result = await container.semanticSearch.execute({
             query,
             topK,
             strategy,
+            useRerank,
+            useHybrid,
+            hybridAlpha,
           });
           return {
             content: [
