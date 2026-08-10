@@ -71,12 +71,20 @@ def main() -> int:
     ax.set_xlim(-0.7, len(settings) - 0.3)
     ax.set_ylim(0, 1.18)
     ax.set_ylabel("Faithfulness (mean)")
-    ax.set_title(f"RAGAS faithfulness by setting\n{model} · {embed}")
+    ax.set_title(f"RAGAS faithfulness by hybrid alpha\n{model} · {embed}")
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.grid(axis="y", linestyle=":", alpha=0.45)
+
+    # Prefer alpha labels when settings are hybrid_a*
+    tick_labels = []
+    for s, n in zip(settings, ns):
+        if s.startswith("hybrid_a"):
+            tick_labels.append(f"alpha={s.replace('hybrid_a', '')}\n(n={n})")
+        else:
+            tick_labels.append(f"{s}\n(n={n})")
     ax.set_xticks(xs)
-    ax.set_xticklabels([f"{s}\n(n={n})" for s, n in zip(settings, ns)], fontsize=10)
+    ax.set_xticklabels(tick_labels, fontsize=10)
 
     for b, v in zip(bars, means):
         # Score above bar with enough headroom; n lives in the x tick.

@@ -1,6 +1,6 @@
 {
   "metric": "faithfulness",
-  "run_id": "20260810T144606Z",
+  "run_id": "20260810T150249Z",
   "api": "http://localhost:3001",
   "dataset": "C:\\Users\\Ulvi\\Desktop\\playablefactory\\evals\\dataset_100.yaml",
   "chat_model": "gpt-4o-mini",
@@ -9,21 +9,21 @@
   "used_ragas": true,
   "rows": [
     {
-      "run_id": "20260810T144606Z",
+      "run_id": "20260810T150249Z",
       "chat_model": "gpt-4o-mini",
       "embedding_model": "text-embedding-3-small",
       "top_k": 5,
-      "setting": "dense",
+      "setting": "hybrid_a0.0",
       "strategy": "recursive",
-      "use_hybrid": false,
-      "hybrid_alpha": null,
+      "use_hybrid": true,
+      "hybrid_alpha": 0.0,
       "use_rerank": false,
-      "faithfulness_avg": 0.9833,
+      "faithfulness_avg": 0.8667,
       "n": 20,
       "used_ragas": true
     },
     {
-      "run_id": "20260810T144606Z",
+      "run_id": "20260810T150249Z",
       "chat_model": "gpt-4o-mini",
       "embedding_model": "text-embedding-3-small",
       "top_k": 5,
@@ -32,26 +32,26 @@
       "use_hybrid": true,
       "hybrid_alpha": 0.5,
       "use_rerank": false,
-      "faithfulness_avg": 1.0,
+      "faithfulness_avg": 0.965,
       "n": 20,
       "used_ragas": true
     },
     {
-      "run_id": "20260810T144606Z",
+      "run_id": "20260810T150249Z",
       "chat_model": "gpt-4o-mini",
       "embedding_model": "text-embedding-3-small",
       "top_k": 5,
-      "setting": "hybrid_a0.5_rerank",
+      "setting": "hybrid_a1.0",
       "strategy": "recursive",
       "use_hybrid": true,
-      "hybrid_alpha": 0.5,
-      "use_rerank": true,
-      "faithfulness_avg": 0.95,
+      "hybrid_alpha": 1.0,
+      "use_rerank": false,
+      "faithfulness_avg": 1.0,
       "n": 20,
       "used_ragas": true
     }
   ],
-  "csv_runs": "C:\\Users\\Ulvi\\Desktop\\playablefactory\\evals\\results\\faithfulness_runs_20260810T144606Z.csv",
+  "csv_runs": "C:\\Users\\Ulvi\\Desktop\\playablefactory\\evals\\results\\faithfulness_runs_20260810T150249Z.csv",
   "csv_summary": "C:\\Users\\Ulvi\\Desktop\\playablefactory\\evals\\results\\faithfulness_summary.csv",
   "note": "Per-row outputs in CSV; ungrounded items use refusal scoring."
 }

@@ -228,17 +228,21 @@ Chat/dashboard can pick strategy. Boot auto-ingest fills all three when empty (`
 
 ## Evaluation
 
-RAGAS **faithfulness** on a 20-question slice of `evals/dataset_100.yaml` (recursive strategy).
+RAGAS **faithfulness** alpha play on a 20-question slice of `evals/dataset_100.yaml` (recursive, no rerank).
 
 Models: `gpt-4o-mini` + `text-embedding-3-small`, `TOP_K=5`.
 
-| Setting | Hybrid α | Rerank | Faithfulness (mean) | n |
-|---------|----------|--------|---------------------|---|
-| **hybrid_a0.5** (winner) | 0.5 | no | **1.00** | 20 |
-| dense | — | no | 0.983 | 20 |
-| hybrid_a0.5_rerank | 0.5 | yes | 0.95 | 20 |
+Fusion: `s = α · densê + (1 − α) · BM25̂`
 
-![RAGAS faithfulness by setting](evals/results/charts/faithfulness_by_setting.png)
+| Setting | α | Meaning | Faithfulness (mean) | n |
+|---------|---|---------|---------------------|---|
+| hybrid_a0.0 | 0.0 | BM25 only | 0.867 | 20 |
+| hybrid_a0.5 | 0.5 | balanced | 0.965 | 20 |
+| **hybrid_a1.0** (winner) | 1.0 | dense only | **1.00** | 20 |
+
+![RAGAS faithfulness by hybrid alpha](evals/results/charts/faithfulness_by_setting.png)
+
+On this slice, raising α (more dense) improved faithfulness; pure BM25 (`α=0`) was weakest.
 
 ```bash
 pip install -r evals/requirements.txt

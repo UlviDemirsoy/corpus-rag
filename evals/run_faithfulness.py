@@ -39,14 +39,14 @@ EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
 TOP_K = int(os.getenv("TOP_K", "5"))
 SKIP_RAGAS = os.getenv("EVAL_SKIP_RAGAS", "false").lower() == "true"
 
-# Keep it small: RAGAS is usually 1 metric × a few configs (not a huge grid).
+# Lean alpha play: BM25-only → balanced → dense-only (via hybrid formula).
 DEFAULT_SETTINGS = [
     {
-        "name": "dense",
+        "name": "hybrid_a0.0",
         "strategy": "recursive",
-        "useHybrid": False,
+        "useHybrid": True,
         "useRerank": False,
-        "hybridAlpha": None,
+        "hybridAlpha": 0.0,
     },
     {
         "name": "hybrid_a0.5",
@@ -56,11 +56,11 @@ DEFAULT_SETTINGS = [
         "hybridAlpha": 0.5,
     },
     {
-        "name": "hybrid_a0.5_rerank",
+        "name": "hybrid_a1.0",
         "strategy": "recursive",
         "useHybrid": True,
-        "useRerank": True,
-        "hybridAlpha": 0.5,
+        "useRerank": False,
+        "hybridAlpha": 1.0,
     },
 ]
 

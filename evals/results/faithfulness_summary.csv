@@ -1,4 +1,4 @@
 run_id,chat_model,embedding_model,top_k,setting,strategy,use_hybrid,hybrid_alpha,use_rerank,faithfulness_avg,n,used_ragas
-20260810T144606Z,gpt-4o-mini,text-embedding-3-small,5,dense,recursive,False,,False,0.9833,20,True
-20260810T144606Z,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,1.0,20,True
-20260810T144606Z,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5_rerank,recursive,True,0.5,True,0.95,20,True
+20260810T150249Z,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.0,recursive,True,0.0,False,0.8667,20,True
+20260810T150249Z,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,0.965,20,True
+20260810T150249Z,gpt-4o-mini,text-embedding-3-small,5,hybrid_a1.0,recursive,True,1.0,False,1.0,20,True
