@@ -1,0 +1,17 @@
+# Evaluation queries from the case sample_questions.md (+ one ungrounded probe)
+
+queries:
+  - question: "What is the maximum file size for an AppLovin playable, and how does it ship?"
+    expect_sources: ["network-specs-applovin.md"]
+  - question: "How do I initialize the current Lumen SDK, and what happened to lumen.track?"
+    expect_sources: ["sdk-notes-v3.md"]
+    notes: "sdk-notes-v2.md is deprecated; a good answer says so"
+  - question: "Why are sound assets built in a separate pass?"
+    expect_sources: ["build-pipeline.md", "incident-postmortem-2026-03.md"]
+  - question: "What caused the March 2026 AppLovin rejections and what was fixed?"
+    expect_sources: ["incident-postmortem-2026-03.md"]
+  - question: "Which languages must every playable ship with, and what is the fallback?"
+    expect_sources: ["localization-guide.md"]
+  - question: "What is the company vacation policy and salary bands for playable engineers?"
+    expect_sources: []
+    expect_ungrounded: true

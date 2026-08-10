@@ -1,0 +1,9 @@
+{
+  "metric": "faithfulness",
+  "note": "Run `python evals/run_faithfulness.py` after ingesting the corpus with a valid OPENAI_API_KEY to populate real scores.",
+  "rows": [
+    { "strategy": "fixed", "faithfulness": null, "n": 0 },
+    { "strategy": "recursive", "faithfulness": null, "n": 0 },
+    { "strategy": "sliding", "faithfulness": null, "n": 0 }
+  ]
+}
