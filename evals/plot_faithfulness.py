@@ -64,18 +64,33 @@ def main() -> int:
 
     CHARTS.mkdir(parents=True, exist_ok=True)
 
-    fig, ax = plt.subplots(figsize=(7, 4))
-    bars = ax.bar(settings, means, color="#0f766e")
-    ax.set_ylim(0, 1.05)
+    # Extra spacing between bars so labels don't collide near 1.0.
+    fig, ax = plt.subplots(figsize=(9, 5))
+    xs = list(range(len(settings)))
+    bars = ax.bar(xs, means, width=0.55, color="#0f766e", align="center")
+    ax.set_xlim(-0.7, len(settings) - 0.3)
+    ax.set_ylim(0, 1.18)
     ax.set_ylabel("Faithfulness (mean)")
     ax.set_title(f"RAGAS faithfulness by setting\n{model} · {embed}")
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.grid(axis="y", linestyle=":", alpha=0.45)
-    for b, v, n in zip(bars, means, ns):
-        ax.text(b.get_x() + b.get_width() / 2, v + 0.02, f"{v:.2f}\nn={n}", ha="center", fontsize=9)
-    plt.xticks(rotation=15, ha="right")
-    fig.tight_layout()
+    ax.set_xticks(xs)
+    ax.set_xticklabels([f"{s}\n(n={n})" for s, n in zip(settings, ns)], fontsize=10)
+
+    for b, v in zip(bars, means):
+        # Score above bar with enough headroom; n lives in the x tick.
+        ax.text(
+            b.get_x() + b.get_width() / 2,
+            min(v + 0.04, 1.12),
+            f"{v:.2f}",
+            ha="center",
+            va="bottom",
+            fontsize=11,
+            fontweight="bold",
+        )
+
+    fig.subplots_adjust(bottom=0.18, top=0.88, left=0.1, right=0.96)
     out = CHARTS / "faithfulness_by_setting.png"
     fig.savefig(out, dpi=140)
     plt.close(fig)
