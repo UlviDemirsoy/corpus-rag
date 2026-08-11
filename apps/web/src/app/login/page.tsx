@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { getProblemMessage } from "@/lib/api-client";
 import { signIn } from "@/lib/auth";
 
@@ -67,6 +68,9 @@ export default function LoginPage() {
               {loading ? "Signing in..." : "Sign in"}
             </Button>
           </form>
+          <div className="mt-4">
+            <GoogleSignInButton />
+          </div>
           <p className="mt-4 text-center text-sm text-slate-600">
             No account?{" "}
             <Link className="font-medium text-teal-800 underline" href="/register">

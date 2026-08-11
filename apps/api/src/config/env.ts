@@ -25,6 +25,15 @@ const EnvSchema = z.object({
   BETTER_AUTH_SECRET: z.string().min(32),
   BETTER_AUTH_URL: z.string().url().default("http://localhost:3001"),
   WEB_ORIGIN: z.string().url().default("http://localhost:3000"),
+  /** Optional — when both set, Google social login is enabled. Empty string → unset. */
+  GOOGLE_CLIENT_ID: z
+    .string()
+    .optional()
+    .transform((v) => (v && v.trim() ? v.trim() : undefined)),
+  GOOGLE_CLIENT_SECRET: z
+    .string()
+    .optional()
+    .transform((v) => (v && v.trim() ? v.trim() : undefined)),
   CORPUS_PATH: z.string().default("./data/corpus"),
   CHUNK_STRATEGY: z.enum(["fixed", "recursive", "sliding"]).default("recursive"),
   EMBEDDING_MODEL: z.string().default("text-embedding-3-small"),

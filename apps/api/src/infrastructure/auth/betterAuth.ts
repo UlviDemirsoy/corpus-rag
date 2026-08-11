@@ -4,6 +4,9 @@ import { env } from "../../config/env.js";
 import { db } from "../db/client.js";
 import * as schema from "../db/schema.js";
 
+const googleEnabled =
+  Boolean(env.GOOGLE_CLIENT_ID) && Boolean(env.GOOGLE_CLIENT_SECRET);
+
 export function createAuth() {
   return betterAuth({
     database: drizzleAdapter(db, {
@@ -20,6 +23,23 @@ export function createAuth() {
     trustedOrigins: [env.WEB_ORIGIN],
     emailAndPassword: {
       enabled: true,
+    },
+    ...(googleEnabled
+      ? {
+          socialProviders: {
+            google: {
+              clientId: env.GOOGLE_CLIENT_ID!,
+              clientSecret: env.GOOGLE_CLIENT_SECRET!,
+              prompt: "select_account" as const,
+            },
+          },
+        }
+      : {}),
+    account: {
+      accountLinking: {
+        enabled: true,
+        trustedProviders: googleEnabled ? ["google"] : [],
+      },
     },
     user: {
       additionalFields: {
@@ -51,6 +71,10 @@ export function createAuth() {
       },
     },
   });
+}
+
+export function isGoogleAuthEnabled() {
+  return googleEnabled;
 }
 
 export type Auth = ReturnType<typeof createAuth>;

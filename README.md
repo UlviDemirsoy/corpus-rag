@@ -50,7 +50,7 @@ If the corpus does not contain enough evidence, the system says so instead of in
 | Monorepo | pnpm workspaces |
 | Web | Next.js 15, Tailwind CSS 4, shadcn-style UI, sonner |
 | API | Express, lite clean architecture (ports & adapters) |
-| Auth | Better Auth (email/password, httpOnly session cookies) + `role` on `user` |
+| Auth | Better Auth (email/password + optional Google OAuth, httpOnly session cookies) + `role` on `user` |
 | DB | PostgreSQL + Drizzle ORM |
 | Vector DB | Qdrant (`@qdrant/js-client-rest`) |
 | Models | OpenAI `text-embedding-3-small` + `gpt-4o-mini` |
@@ -67,7 +67,7 @@ If the corpus does not contain enough evidence, the system says so instead of in
 - **Dense + BM25 hybrid (α)** — candidates from Qdrant dense and in-house Okapi BM25 (payload text); min–max normalize; `s = α·densê + (1−α)·BM25̂`. Chat/MCP pass `useHybrid` / `hybridAlpha`.
 - **Dense retrieve → OpenAI rerank** — after hybrid (or dense-only), optional `gpt-4o-mini` rerank; `useRerank` defaults to `RERANK_ENABLED`.
 - **Lite DDD / clean architecture** — use cases depend on ports (`VectorStore`, `Embedder`, `Chunker`, `Reranker`, `LexicalSearch`), not frameworks.
-- **Session cookies (not custom JWT pair)** — Better Auth session is enough for the web app; `account.refresh_token` exists for OAuth providers.
+- **Session cookies (not custom JWT pair)** — Better Auth session is enough for the web app; Google login uses OAuth/OIDC then the same httpOnly session cookie (no JWT rewrite needed).
 
 ## Architecture
 
@@ -129,6 +129,22 @@ Postgres credentials (pgAdmin server host inside Docker: `postgres`):
 | admin | admin@demo.com | admin1234 | Chat + **Dashboard** |
 
 Or open http://localhost:3000/register to create a new **user** account (default role).
+
+### Google login (optional)
+
+JWT not required — Google OAuth creates the same Better Auth session cookie as email/password.
+
+1. [Google Cloud Console](https://console.cloud.google.com/apis/credentials) → create **OAuth client ID** (Web application)
+2. Authorized redirect URI: `http://localhost:3000/api/auth/callback/google`
+3. Put credentials in `.env`:
+   ```bash
+   GOOGLE_CLIENT_ID=....apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=...
+   ```
+4. Restart API (`pnpm docker:up` or `pnpm dev:api`)
+5. Login/register shows **Continue with Google** when both vars are set
+
+New Google users get role `user`. Promote via Dashboard → Users (admin).
 
 ## Local (non-Docker) development
 
@@ -262,6 +278,7 @@ See `.env.example`. Important:
 | `DATABASE_URL` | Postgres |
 | `QDRANT_URL` | Vector store |
 | `BETTER_AUTH_SECRET` | Auth signing (≥32 chars) |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional Google OAuth; both required to enable social login |
 | `CORPUS_PATH` | Documents root |
 | `CHUNK_STRATEGY` | Default strategy |
 | `TOP_K` | Final passages returned to chat/search |

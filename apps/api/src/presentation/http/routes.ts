@@ -8,6 +8,7 @@ import {
 } from "@rag/shared";
 import type { Container } from "../../composition/container.js";
 import { ValidationError } from "../../domain/errors/AppError.js";
+import { isGoogleAuthEnabled } from "../../infrastructure/auth/betterAuth.js";
 import { createAuthMiddleware, requireRole, type AuthedRequest } from "./middleware/auth.js";
 
 export function createRouter(container: Container) {
@@ -16,6 +17,11 @@ export function createRouter(container: Container) {
 
   router.get("/health", (_req, res) => {
     res.json({ ok: true, service: "rag-api" });
+  });
+
+  /** Public — which login methods the UI should show. */
+  router.get("/auth-options", (_req, res) => {
+    res.json({ google: isGoogleAuthEnabled() });
   });
 
   router.get("/me", requireAuth, (req: AuthedRequest, res) => {
