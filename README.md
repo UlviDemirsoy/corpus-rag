@@ -2,6 +2,11 @@
 
 Semantic search + grounded RAG over a document corpus, with an admin dashboard and an MCP search tool. Built as a TypeScript monorepo.
 
+**Live site:** [https://playablefactory.vercel.app](https://playablefactory.vercel.app)  
+**MCP:** `https://playablefactory.vercel.app/mcp` (OAuth login required — see [MCP server](#mcp-server-search))
+
+Demo: `user@demo.com` / `user1234` · admin: `admin@demo.com` / `admin1234`
+
 ## What this application does
 
 1. **Ingests** markdown/text documents (chunk → embed → Qdrant)
