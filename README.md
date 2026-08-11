@@ -300,7 +300,7 @@ Vercel **does not run `docker-compose.yml`**. Compose concepts map to [Vercel Se
 | Compose | Production |
 |---------|------------|
 | `web` | Vercel Service `web` (Next.js, `apps/web`) |
-| `api` | Vercel Service `api` (container → [`docker/Dockerfile.vercel.api`](docker/Dockerfile.vercel.api)) |
+| `api` | Vercel Service `api` (container → [`docker/Dockerfile.vercel`](docker/Dockerfile.vercel)) |
 | `postgres` | **Neon** (Vercel Marketplace) — not a container |
 | `qdrant` | **Qdrant Cloud** — not a container |
 | `pgadmin` | Omit in prod |
