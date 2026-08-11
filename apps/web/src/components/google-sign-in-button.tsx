@@ -6,7 +6,12 @@ import { Button } from "@/components/ui/button";
 import { getProblemMessage } from "@/lib/api-client";
 import { getAuthOptions, signInWithGoogle } from "@/lib/auth";
 
-export function GoogleSignInButton() {
+type Props = {
+  /** Path (or absolute path+query) to return to after Google OAuth. */
+  callbackPath?: string;
+};
+
+export function GoogleSignInButton({ callbackPath = "/chat" }: Props) {
   const [enabled, setEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -25,7 +30,7 @@ export function GoogleSignInButton() {
   async function onClick() {
     setLoading(true);
     try {
-      await signInWithGoogle("/chat");
+      await signInWithGoogle(callbackPath);
     } catch (err) {
       toast.error(getProblemMessage(err));
       setLoading(false);

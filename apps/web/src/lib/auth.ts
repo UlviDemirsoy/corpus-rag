@@ -23,6 +23,44 @@ export async function signIn(email: string, password: string) {
   });
 }
 
+/**
+ * Sign-in that follows Better Auth MCP OAuth continue redirects
+ * (oidc_login_prompt cookie → authorize → Cursor callback).
+ */
+export async function signInEmailContinue(
+  email: string,
+  password: string,
+): Promise<{ redirected: boolean }> {
+  const res = await fetch("/api/auth/sign-in/email", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    redirect: "manual",
+    body: JSON.stringify({ email, password }),
+  });
+
+  if (res.status >= 300 && res.status < 400) {
+    const loc = res.headers.get("Location");
+    if (loc) {
+      window.location.href = loc;
+      return { redirected: true };
+    }
+  }
+
+  if (!res.ok) {
+    let detail = `HTTP ${res.status}`;
+    try {
+      const body = (await res.json()) as { message?: string; detail?: string };
+      detail = body.detail ?? body.message ?? detail;
+    } catch {
+      // ignore
+    }
+    throw new Error(detail);
+  }
+
+  return { redirected: false };
+}
+
 export async function signUp(input: {
   email: string;
   password: string;
@@ -60,4 +98,11 @@ export async function signInWithGoogle(callbackPath = "/chat") {
     return;
   }
   throw new Error("Google sign-in did not return a redirect URL");
+}
+
+/** After login, continue MCP authorize if OAuth query params are present. */
+export function mcpAuthorizeContinuePath(search: string): string | null {
+  const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+  if (!params.has("client_id")) return null;
+  return `/api/auth/mcp/authorize?${params.toString()}`;
 }

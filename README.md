@@ -40,7 +40,6 @@ If the corpus does not contain enough evidence, the system says so instead of in
 - **Dense + BM25 hybrid (α)** + OpenAI rerank: fuse `s = α·densê + (1−α)·BM25̂` (chat UI α slider + formula), then optional rerank to `TOP_K`
 
 ### Explicitly out of scope (timebox)
-- MCP OIDC
 - Live public deployment (guide below on how we would deploy)
 
 ## Technology stack
@@ -200,11 +199,9 @@ curl -b cookies.txt -X POST http://localhost:3001/api/chat \
 
 ## MCP server (search)
 
-Same retrieval stack as `POST /api/search`. **No MCP OIDC** (case out of scope).
+Same retrieval stack as `POST /api/search`. Remote MCP requires **login** (Better Auth MCP OAuth — Google or email/password). Cursor prompts you to sign in before `search` works.
 
 ### Remote (production) — Streamable HTTP
-
-Anyone can point an MCP client at the deployed API:
 
 **URL:** `https://playablefactory.vercel.app/mcp`  
 (alias: `/api/mcp`)
@@ -221,18 +218,9 @@ Cursor `mcp.json`:
 }
 ```
 
-Optional shared secret: set `MCP_API_KEY` on the API, then:
+On first connect, Cursor opens the site login (`/login`) — use **Continue with Google** or a demo account. OAuth discovery: `/.well-known/oauth-authorization-server` and `/.well-known/oauth-protected-resource`.
 
-```json
-{
-  "mcpServers": {
-    "corpus-search": {
-      "url": "https://playablefactory.vercel.app/mcp",
-      "headers": { "Authorization": "Bearer YOUR_MCP_API_KEY" }
-    }
-  }
-}
-```
+Optional automation bypass (not for interactive clients): set `MCP_API_KEY` and send `Authorization: Bearer …`.
 
 ### Local stdio (dev)
 

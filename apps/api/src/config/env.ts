@@ -49,8 +49,8 @@ const EnvSchema = z.object({
   GOOGLE_CLIENT_ID: optionalString,
   GOOGLE_CLIENT_SECRET: optionalString,
   /**
-   * Optional Bearer token for Streamable HTTP MCP (`/mcp`).
-   * When unset, remote MCP is open (demo). Set in production if you want a shared secret.
+   * Optional shared Bearer for Streamable HTTP MCP (`/mcp`).
+   * Remote MCP always requires Better Auth OAuth login; this key is an automation bypass only.
    */
   MCP_API_KEY: optionalString,
   CORPUS_PATH: z.string().default("./data/corpus"),

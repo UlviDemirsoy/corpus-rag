@@ -6,14 +6,20 @@ import { env } from "../../config/env.js";
 import { logger } from "../../infrastructure/logging/logger.js";
 import { mountHttpMcp } from "../mcp/httpMcp.js";
 import { errorHandler, traceMiddleware } from "./middleware/errorHandler.js";
+import { mountOAuthWellKnown } from "./oauthWellKnown.js";
 import { createRouter } from "./routes.js";
 
 export function createHttpServer(container: Container) {
   const app = express();
 
   // Remote MCP clients (Cursor, etc.) — permissive CORS on MCP paths only
-  app.use("/mcp", cors({ origin: true }));
-  app.use("/api/mcp", cors({ origin: true }));
+  const mcpCors = cors({
+    origin: true,
+    exposedHeaders: ["WWW-Authenticate"],
+  });
+  app.use("/mcp", mcpCors);
+  app.use("/api/mcp", mcpCors);
+  app.use("/.well-known", cors({ origin: true }));
   app.use(
     cors({
       origin: env.WEB_ORIGIN,
@@ -43,7 +49,8 @@ export function createHttpServer(container: Container) {
     next();
   });
 
-  // Remote MCP (Streamable HTTP) — public on this API host
+  mountOAuthWellKnown(app, container);
+  // Remote MCP (Streamable HTTP) — OAuth required
   mountHttpMcp(app, container);
 
   app.use("/api", createRouter(container));

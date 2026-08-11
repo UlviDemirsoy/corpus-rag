@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
+import { FormEvent, Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,10 +10,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { getProblemMessage } from "@/lib/api-client";
-import { signIn } from "@/lib/auth";
+import { mcpAuthorizeContinuePath, signInEmailContinue } from "@/lib/auth";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const oauthContinue = mcpAuthorizeContinuePath(searchParams.toString());
   const [email, setEmail] = useState("user@demo.com");
   const [password, setPassword] = useState("user1234");
   const [loading, setLoading] = useState(false);
@@ -22,7 +24,12 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await signIn(email, password);
+      const { redirected } = await signInEmailContinue(email, password);
+      if (redirected) return;
+      if (oauthContinue) {
+        window.location.href = oauthContinue;
+        return;
+      }
       toast.success("Signed in");
       router.push("/chat");
       router.refresh();
@@ -37,9 +44,11 @@ export default function LoginPage() {
     <main className="mx-auto flex min-h-screen max-w-md items-center px-4 py-10">
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Sign in</CardTitle>
+          <CardTitle>{oauthContinue ? "Sign in for MCP" : "Sign in"}</CardTitle>
           <CardDescription>
-            Demo: user@demo.com / user1234 (chat) · admin@demo.com / admin1234 (dashboard)
+            {oauthContinue
+              ? "Sign in with Google or email to authorize Cursor MCP access."
+              : "Demo: user@demo.com / user1234 (chat) · admin@demo.com / admin1234 (dashboard)"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -69,7 +78,9 @@ export default function LoginPage() {
             </Button>
           </form>
           <div className="mt-4">
-            <GoogleSignInButton />
+            <GoogleSignInButton
+              callbackPath={oauthContinue ?? "/chat"}
+            />
           </div>
           <p className="mt-4 text-center text-sm text-slate-600">
             No account?{" "}
@@ -80,5 +91,13 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<main className="mx-auto min-h-screen max-w-md px-4 py-10" />}>
+      <LoginForm />
+    </Suspense>
   );
 }

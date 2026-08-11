@@ -12,7 +12,9 @@ evals/results/**
 !evals/results/faithfulness_summary.csv
 !evals/results/charts/
 !evals/results/charts/**
-apps/api/drizzle/meta
+# Keep Drizzle journal in git so prod migrate sees pending SQL; ignore snapshots only
+apps/api/drizzle/meta/*
+!apps/api/drizzle/meta/_journal.json
 *.tsbuildinfo
 .vercel
 .env.local
