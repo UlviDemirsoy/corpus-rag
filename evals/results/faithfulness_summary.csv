@@ -1,4 +1,13 @@
-run_id,chat_model,embedding_model,top_k,setting,strategy,use_hybrid,hybrid_alpha,use_rerank,faithfulness_avg,n,used_ragas
-20260810T150249Z,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.0,recursive,True,0.0,False,0.8667,20,True
-20260810T150249Z,gpt-4o-mini,text-embedding-3-small,5,hybrid_a0.5,recursive,True,0.5,False,0.965,20,True
-20260810T150249Z,gpt-4o-mini,text-embedding-3-small,5,hybrid_a1.0,recursive,True,1.0,False,1.0,20,True
+run_id,chat_model,embedding_model,top_k,setting,strategy,use_hybrid,hybrid_alpha,use_rerank,faithfulness_avg,faithfulness_std,n,used_ragas
+20260811T023737Z,gpt-4o-mini,text-embedding-3-small,5,fixed_hyb0_rr0,fixed,False,,False,0.9875,0.0559,20,True
+20260811T023737Z,gpt-4o-mini,text-embedding-3-small,5,fixed_hyb0_rr1,fixed,False,,True,0.9667,0.1026,20,True
+20260811T023737Z,gpt-4o-mini,text-embedding-3-small,5,fixed_hyb1_rr0,fixed,True,0.5,False,0.9521,0.1188,20,True
+20260811T023737Z,gpt-4o-mini,text-embedding-3-small,5,fixed_hyb1_rr1,fixed,True,0.5,True,0.9833,0.0745,20,True
+20260811T023737Z,gpt-4o-mini,text-embedding-3-small,5,recursive_hyb0_rr0,recursive,False,,False,0.9667,0.1491,20,True
+20260811T023737Z,gpt-4o-mini,text-embedding-3-small,5,recursive_hyb0_rr1,recursive,False,,True,0.9667,0.1026,20,True
+20260811T023737Z,gpt-4o-mini,text-embedding-3-small,5,recursive_hyb1_rr0,recursive,True,0.5,False,0.975,0.1118,20,True
+20260811T023737Z,gpt-4o-mini,text-embedding-3-small,5,recursive_hyb1_rr1,recursive,True,0.5,True,0.9667,0.1026,20,True
+20260811T023737Z,gpt-4o-mini,text-embedding-3-small,5,sliding_hyb0_rr0,sliding,False,,False,0.9688,0.1138,20,True
+20260811T023737Z,gpt-4o-mini,text-embedding-3-small,5,sliding_hyb0_rr1,sliding,False,,True,0.9833,0.0745,20,True
+20260811T023737Z,gpt-4o-mini,text-embedding-3-small,5,sliding_hyb1_rr0,sliding,True,0.5,False,0.9833,0.0745,20,True
+20260811T023737Z,gpt-4o-mini,text-embedding-3-small,5,sliding_hyb1_rr1,sliding,True,0.5,True,0.9583,0.1311,20,True

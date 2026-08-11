@@ -1,26 +1,132 @@
 {
-  "source_csv": "evals\\results\\faithfulness_runs_20260810T150249Z.csv",
+  "source_csv": "C:\\Users\\Ulvi\\Desktop\\playablefactory\\evals\\results\\faithfulness_runs_20260811T023737Z.csv",
+  "unit": "approach",
   "chat_model": "gpt-4o-mini",
   "embedding_model": "text-embedding-3-small",
+  "n_approaches": 12,
+  "n_questions_per_approach": 20,
   "chart": "C:\\Users\\Ulvi\\Desktop\\playablefactory\\evals\\results\\charts\\faithfulness_by_setting.png",
+  "heatmap": "C:\\Users\\Ulvi\\Desktop\\playablefactory\\evals\\results\\charts\\faithfulness_by_approach_heatmap.png",
   "rows": [
     {
-      "setting": "hybrid_a0.0",
+      "setting": "fixed_hyb0_rr0",
+      "strategy": "fixed",
+      "use_hybrid": "False",
+      "use_rerank": "False",
       "n": 20,
-      "faithfulness_avg": 0.8667,
-      "latency_avg_ms": 1632.9
+      "faithfulness_avg": 0.9875,
+      "faithfulness_std": 0.0559,
+      "latency_avg_ms": 1497.5
     },
     {
-      "setting": "hybrid_a0.5",
+      "setting": "fixed_hyb0_rr1",
+      "strategy": "fixed",
+      "use_hybrid": "False",
+      "use_rerank": "True",
       "n": 20,
-      "faithfulness_avg": 0.965,
-      "latency_avg_ms": 1665.0
+      "faithfulness_avg": 0.9667,
+      "faithfulness_std": 0.1026,
+      "latency_avg_ms": 3698.8
     },
     {
-      "setting": "hybrid_a1.0",
+      "setting": "fixed_hyb1_rr0",
+      "strategy": "fixed",
+      "use_hybrid": "True",
+      "use_rerank": "False",
       "n": 20,
-      "faithfulness_avg": 1.0,
-      "latency_avg_ms": 1586.2
+      "faithfulness_avg": 0.9521,
+      "faithfulness_std": 0.1188,
+      "latency_avg_ms": 1175.0
+    },
+    {
+      "setting": "fixed_hyb1_rr1",
+      "strategy": "fixed",
+      "use_hybrid": "True",
+      "use_rerank": "True",
+      "n": 20,
+      "faithfulness_avg": 0.9833,
+      "faithfulness_std": 0.0745,
+      "latency_avg_ms": 3754.8
+    },
+    {
+      "setting": "recursive_hyb0_rr0",
+      "strategy": "recursive",
+      "use_hybrid": "False",
+      "use_rerank": "False",
+      "n": 20,
+      "faithfulness_avg": 0.9667,
+      "faithfulness_std": 0.1491,
+      "latency_avg_ms": 1263.8
+    },
+    {
+      "setting": "recursive_hyb0_rr1",
+      "strategy": "recursive",
+      "use_hybrid": "False",
+      "use_rerank": "True",
+      "n": 20,
+      "faithfulness_avg": 0.9667,
+      "faithfulness_std": 0.1026,
+      "latency_avg_ms": 3708.4
+    },
+    {
+      "setting": "recursive_hyb1_rr0",
+      "strategy": "recursive",
+      "use_hybrid": "True",
+      "use_rerank": "False",
+      "n": 20,
+      "faithfulness_avg": 0.975,
+      "faithfulness_std": 0.1118,
+      "latency_avg_ms": 1120.3
+    },
+    {
+      "setting": "recursive_hyb1_rr1",
+      "strategy": "recursive",
+      "use_hybrid": "True",
+      "use_rerank": "True",
+      "n": 20,
+      "faithfulness_avg": 0.9667,
+      "faithfulness_std": 0.1026,
+      "latency_avg_ms": 3578.2
+    },
+    {
+      "setting": "sliding_hyb0_rr0",
+      "strategy": "sliding",
+      "use_hybrid": "False",
+      "use_rerank": "False",
+      "n": 20,
+      "faithfulness_avg": 0.9688,
+      "faithfulness_std": 0.1138,
+      "latency_avg_ms": 1154.8
+    },
+    {
+      "setting": "sliding_hyb0_rr1",
+      "strategy": "sliding",
+      "use_hybrid": "False",
+      "use_rerank": "True",
+      "n": 20,
+      "faithfulness_avg": 0.9833,
+      "faithfulness_std": 0.0745,
+      "latency_avg_ms": 3806.8
+    },
+    {
+      "setting": "sliding_hyb1_rr0",
+      "strategy": "sliding",
+      "use_hybrid": "True",
+      "use_rerank": "False",
+      "n": 20,
+      "faithfulness_avg": 0.9833,
+      "faithfulness_std": 0.0745,
+      "latency_avg_ms": 1227.8
+    },
+    {
+      "setting": "sliding_hyb1_rr1",
+      "strategy": "sliding",
+      "use_hybrid": "True",
+      "use_rerank": "True",
+      "n": 20,
+      "faithfulness_avg": 0.9583,
+      "faithfulness_std": 0.1311,
+      "latency_avg_ms": 3719.4
     }
   ]
 }

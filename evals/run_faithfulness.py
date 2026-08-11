@@ -1,14 +1,18 @@
 """
-RAGAS faithfulness evaluation across retrieval settings.
+RAGAS faithfulness evaluation across retrieval approaches.
+
+Approaches are the unit of comparison (questions are the sample).
+Default grid: 3 strategies × hybrid on/off × rerank on/off = 12 approaches × N questions.
 
 Writes:
-  - evals/results/faithfulness_runs.csv   (one row per question × setting)
-  - evals/results/faithfulness_summary.csv
+  - evals/results/faithfulness_runs.csv   (one row per question × approach)
+  - evals/results/faithfulness_summary.csv  (one row per approach)
   - evals/results/faithfulness.json
 
 Usage:
-  python evals/run_faithfulness.py
   python evals/run_faithfulness.py --limit 20
+  python evals/run_faithfulness.py --preset approach --limit 20
+  python evals/run_faithfulness.py --preset alpha --limit 20
 """
 
 from __future__ import annotations
@@ -16,6 +20,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import math
 import os
 import sys
 import time
@@ -38,9 +43,34 @@ CHAT_MODEL = os.getenv("CHAT_MODEL", "gpt-4o-mini")
 EMBEDDING_MODEL = os.getenv("EMBEDDING_MODEL", "text-embedding-3-small")
 TOP_K = int(os.getenv("TOP_K", "5"))
 SKIP_RAGAS = os.getenv("EVAL_SKIP_RAGAS", "false").lower() == "true"
+DEFAULT_HYBRID_ALPHA = float(os.getenv("EVAL_HYBRID_ALPHA", "0.5"))
 
-# Lean alpha play: BM25-only → balanced → dense-only (via hybrid formula).
-DEFAULT_SETTINGS = [
+STRATEGIES = ("fixed", "recursive", "sliding")
+
+
+def build_approach_grid(hybrid_alpha: float = DEFAULT_HYBRID_ALPHA) -> list[dict]:
+    """3 strategies × hybrid × rerank → 12 approaches."""
+    settings: list[dict] = []
+    for strategy in STRATEGIES:
+        for use_hybrid in (False, True):
+            for use_rerank in (False, True):
+                hyb = "hyb1" if use_hybrid else "hyb0"
+                rr = "rr1" if use_rerank else "rr0"
+                name = f"{strategy}_{hyb}_{rr}"
+                settings.append(
+                    {
+                        "name": name,
+                        "strategy": strategy,
+                        "useHybrid": use_hybrid,
+                        "useRerank": use_rerank,
+                        "hybridAlpha": hybrid_alpha if use_hybrid else None,
+                    }
+                )
+    return settings
+
+
+# Legacy alpha sweep (recursive only) — keep for A/B against older charts.
+ALPHA_SETTINGS = [
     {
         "name": "hybrid_a0.0",
         "strategy": "recursive",
@@ -63,6 +93,8 @@ DEFAULT_SETTINGS = [
         "hybridAlpha": 1.0,
     },
 ]
+
+DEFAULT_SETTINGS = build_approach_grid()
 
 RUN_CSV_FIELDS = [
     "run_id",
@@ -205,11 +237,25 @@ def ragas_faithfulness(answer: str, contexts: list[str], question: str) -> float
         return None
 
 
-def load_settings() -> list[dict]:
+def load_settings(preset: str) -> list[dict]:
     raw = os.getenv("EVAL_SETTINGS_JSON")
     if raw:
         return json.loads(raw)
-    return DEFAULT_SETTINGS
+    if preset == "alpha":
+        return ALPHA_SETTINGS
+    if preset == "approach":
+        return build_approach_grid()
+    raise SystemExit(f"Unknown preset: {preset}")
+
+
+def mean_std(scores: list[float]) -> tuple[float, float]:
+    if not scores:
+        return 0.0, 0.0
+    avg = sum(scores) / len(scores)
+    if len(scores) == 1:
+        return avg, 0.0
+    var = sum((x - avg) ** 2 for x in scores) / (len(scores) - 1)
+    return avg, math.sqrt(var)
 
 
 def write_summary_csv(path: Path, rows: list[dict]) -> None:
@@ -224,6 +270,7 @@ def write_summary_csv(path: Path, rows: list[dict]) -> None:
         "hybrid_alpha",
         "use_rerank",
         "faithfulness_avg",
+        "faithfulness_std",
         "n",
         "used_ragas",
     ]
@@ -237,6 +284,12 @@ def write_summary_csv(path: Path, rows: list[dict]) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--limit", type=int, default=0, help="Cap queries (0 = all)")
+    parser.add_argument(
+        "--preset",
+        choices=("approach", "alpha"),
+        default=os.getenv("EVAL_PRESET", "approach"),
+        help="approach = 12 settings (strategy×hybrid×rerank); alpha = recursive α sweep",
+    )
     parser.add_argument(
         "--dataset",
         default=os.getenv("EVAL_DATASET", str(Path(__file__).parent / "dataset_100.yaml")),
@@ -254,7 +307,7 @@ def main() -> int:
     if args.limit and args.limit > 0:
         queries = queries[: args.limit]
 
-    settings = load_settings()
+    settings = load_settings(args.preset)
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     runs_path = RESULTS / f"faithfulness_runs_{run_id}.csv"
     latest_runs = RESULTS / "faithfulness_runs.csv"
@@ -264,12 +317,22 @@ def main() -> int:
     details: list[dict] = []
     summary_scores: dict[str, list[float]] = {s["name"]: [] for s in settings}
     used_ragas = False
+    total = len(settings) * len(queries)
 
     print(
-        f"run_id={run_id} models chat={CHAT_MODEL} embed={EMBEDDING_MODEL} top_k={TOP_K}",
+        f"run_id={run_id} preset={args.preset} models chat={CHAT_MODEL} "
+        f"embed={EMBEDDING_MODEL} top_k={TOP_K}",
         flush=True,
     )
-    print(f"queries={len(queries)} settings={len(settings)} -> {runs_path}", flush=True)
+    print(
+        f"approaches={len(settings)} questions={len(queries)} "
+        f"total_runs={total} -> {runs_path}",
+        flush=True,
+    )
+    print(
+        "Aggregation unit = approach (mean faithfulness over questions).",
+        flush=True,
+    )
 
     with runs_path.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=RUN_CSV_FIELDS)
@@ -277,9 +340,10 @@ def main() -> int:
 
         with httpx.Client(timeout=180.0, follow_redirects=True) as client:
             sign_in(client)
+            done = 0
             for setting in settings:
                 name = setting["name"]
-                print(f"\n=== setting: {name} ===", flush=True)
+                print(f"\n=== approach: {name} ===", flush=True)
                 for i, item in enumerate(queries, start=1):
                     q = item["question"]
                     expect_ungrounded = bool(item.get("expect_ungrounded"))
@@ -347,8 +411,10 @@ def main() -> int:
                     details.append(row)
                     writer.writerow(row)
                     f.flush()
+                    done += 1
                     print(
-                        f"[{name} {i}/{len(queries)}] {score:.3f} {method} ({latency_ms}ms) {q[:70]}",
+                        f"[{done}/{total} {name} q{i}/{len(queries)}] "
+                        f"{score:.3f} {method} ({latency_ms}ms) {q[:60]}",
                         flush=True,
                     )
 
@@ -356,7 +422,7 @@ def main() -> int:
     for setting in settings:
         name = setting["name"]
         scores = summary_scores[name]
-        avg = sum(scores) / len(scores) if scores else 0.0
+        avg, std = mean_std(scores)
         summary_rows.append(
             {
                 "run_id": run_id,
@@ -369,17 +435,28 @@ def main() -> int:
                 "hybrid_alpha": setting.get("hybridAlpha"),
                 "use_rerank": bool(setting.get("useRerank")),
                 "faithfulness_avg": round(avg, 4),
+                "faithfulness_std": round(std, 4),
                 "n": len(scores),
                 "used_ragas": used_ragas,
             }
         )
 
+    # Stable approach order for reading
+    summary_rows.sort(
+        key=lambda r: (
+            STRATEGIES.index(r["strategy"]) if r["strategy"] in STRATEGIES else 99,
+            0 if not r["use_hybrid"] else 1,
+            0 if not r["use_rerank"] else 1,
+        )
+    )
+
     write_summary_csv(summary_path, summary_rows)
-    # Convenience copy without timestamp in name
     latest_runs.write_text(runs_path.read_text(encoding="utf-8"), encoding="utf-8")
 
     out = {
         "metric": "faithfulness",
+        "unit": "approach",
+        "preset": args.preset,
         "run_id": run_id,
         "api": API_URL,
         "dataset": str(dataset_path),
@@ -387,18 +464,25 @@ def main() -> int:
         "embedding_model": EMBEDDING_MODEL,
         "top_k": TOP_K,
         "used_ragas": used_ragas,
+        "n_approaches": len(settings),
+        "n_questions": len(queries),
+        "n_runs": total,
         "rows": summary_rows,
         "csv_runs": str(runs_path),
         "csv_summary": str(summary_path),
-        "note": "Per-row outputs in CSV; ungrounded items use refusal scoring.",
+        "note": (
+            "Scores aggregated by approach (mean over questions). "
+            "Per-question rows stay in the runs CSV for debugging."
+        ),
     }
     json_path.write_text(json.dumps(out, indent=2), encoding="utf-8")
 
-    print("\nSummary:", flush=True)
+    print("\nApproach summary (mean ± std over questions):", flush=True)
     for row in summary_rows:
         print(
-            f"  {row['setting']}: {row['faithfulness_avg']} (n={row['n']}) "
-            f"alpha={row['hybrid_alpha']} rerank={row['use_rerank']}",
+            f"  {row['setting']}: {row['faithfulness_avg']:.4f} "
+            f"± {row['faithfulness_std']:.4f} (n={row['n']}) "
+            f"hybrid={row['use_hybrid']} rerank={row['use_rerank']}",
             flush=True,
         )
     print(f"Wrote {runs_path}", flush=True)

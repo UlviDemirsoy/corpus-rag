@@ -242,29 +242,52 @@ Chat/dashboard can pick strategy. Boot auto-ingest fills all three when empty (`
 
 ## Evaluation
 
-RAGAS **faithfulness** alpha play on a 20-question slice of `evals/dataset_100.yaml` (recursive, no rerank).
+Unit of comparison is the **approach** (retrieval setting); questions are the sample. Summary = mean ± std faithfulness over questions.
 
-Models: `gpt-4o-mini` + `text-embedding-3-small`, `TOP_K=5`.
+### Approach grid (default)
 
-Fusion: `s = α · densê + (1 − α) · BM25̂`
-
-| Setting | α | Meaning | Faithfulness (mean) | n |
-|---------|---|---------|---------------------|---|
-| hybrid_a0.0 | 0.0 | BM25 only | 0.867 | 20 |
-| hybrid_a0.5 | 0.5 | balanced | 0.965 | 20 |
-| **hybrid_a1.0** (winner) | 1.0 | dense only | **1.00** | 20 |
-
-![RAGAS faithfulness by hybrid alpha](evals/results/charts/faithfulness_by_setting.png)
-
-On this slice, raising α (more dense) improved faithfulness; pure BM25 (`α=0`) was weakest.
+`3 strategies × hybrid on/off × rerank on/off` = **12 approaches** × **20 questions** = **240 runs**.  
+Hybrid on → α=`0.5`; hybrid off → dense-only. Models: `gpt-4o-mini` + `text-embedding-3-small`, `TOP_K=5`.
 
 ```bash
 pip install -r evals/requirements.txt
-python evals/run_faithfulness.py --limit 20
+# API up + fixed/recursive/sliding indexes populated
+python evals/run_faithfulness.py --preset approach --limit 20
 python evals/plot_faithfulness.py
 ```
 
-Outputs: `evals/results/faithfulness_runs.csv`, `faithfulness_summary.csv`, `faithfulness.json`, chart above.
+Latest run (`20260811T023737Z`, n=20 questions / approach):
+
+| Approach | Strategy | Hybrid | Rerank | Faithfulness |
+|----------|----------|--------|--------|--------------|
+| **fixed_hyb0_rr0** | fixed | off | off | **0.988** |
+| fixed_hyb1_rr1 | fixed | on | on | 0.983 |
+| sliding_hyb0_rr1 | sliding | off | on | 0.983 |
+| sliding_hyb1_rr0 | sliding | on | off | 0.983 |
+| recursive_hyb1_rr0 | recursive | on | off | 0.975 |
+| sliding_hyb0_rr0 | sliding | off | off | 0.969 |
+| fixed_hyb0_rr1 | fixed | off | on | 0.967 |
+| recursive_hyb0_rr0 | recursive | off | off | 0.967 |
+| recursive_hyb0_rr1 | recursive | off | on | 0.967 |
+| recursive_hyb1_rr1 | recursive | on | on | 0.967 |
+| sliding_hyb1_rr1 | sliding | on | on | 0.958 |
+| fixed_hyb1_rr0 | fixed | on | off | 0.952 |
+
+Winner on this slice: **fixed + dense + no rerank** (0.988). Gaps are small; all approaches ≥ 0.95.
+
+![Faithfulness by approach](evals/results/charts/faithfulness_by_setting.png)
+
+![Approach heatmap](evals/results/charts/faithfulness_by_approach_heatmap.png)
+
+### Legacy alpha sweep
+
+```bash
+python evals/run_faithfulness.py --preset alpha --limit 20
+```
+
+Earlier recursive-only α play (reference): α=0.0 → 0.867, α=0.5 → 0.965, α=1.0 → 1.00.
+
+Outputs: `faithfulness_runs.csv` (question×approach), `faithfulness_summary.csv` (per approach), `faithfulness.json`.
 
 ## Environment variables
 
