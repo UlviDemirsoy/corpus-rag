@@ -68,14 +68,13 @@ If the corpus does not contain enough evidence, the system says so instead of in
 - **Dense retrieve → OpenAI rerank** — after hybrid (or dense-only), optional `gpt-4o-mini` rerank; `useRerank` defaults to `RERANK_ENABLED`.
 - **Lite DDD / clean architecture** — use cases depend on ports (`VectorStore`, `Embedder`, `Chunker`, `Reranker`, `LexicalSearch`), not frameworks.
 - **Session cookies (not custom JWT pair)** — Better Auth session is enough for the web app; Google login uses OAuth/OIDC then the same httpOnly session cookie (no JWT rewrite needed).
+- **Compose → Vercel Services** — local Docker Compose for dev; prod maps `web`/`api` to Vercel Services, Postgres→Neon, Qdrant→Qdrant Cloud (no Compose on Vercel).
 
 ## Architecture
 
 ```text
-Browser (:3000) ──► Web (Next)
-                 └─► API (:3001) ──► Postgres
-                                  ├─► Qdrant (dense + BM25 payloads)
-                                  └─► OpenAI (embed + rerank + chat)
+Local:  Browser (:3000) ──► Web ──rewrite──► API (:3001) ──► Postgres + Qdrant + OpenAI
+Prod:   Browser ──► Vercel (web + /api→api service) ──► Neon + Qdrant Cloud + OpenAI
 
 MCP client ──stdio──► API MCP entry ──► SemanticSearch (same use case)
 ```
@@ -201,36 +200,35 @@ curl -b cookies.txt -X POST http://localhost:3001/api/chat \
 
 ## MCP server (search)
 
-```bash
-# local
-pnpm mcp
+Local **stdio** MCP (`corpus-search`) — same retrieval stack as `POST /api/search`.  
+**No MCP OIDC** (case out of scope): auth is “process has `.env` + DB/Qdrant access”, not browser login.  
+(Web app Google OAuth ≠ MCP OIDC; they are separate.)
 
-# or from Docker host using the same codebase/env pointing at published ports
+```bash
+# Postgres + Qdrant must be up (Docker is fine)
+pnpm mcp
 ```
 
-Cursor `mcp.json` example:
+Project Cursor config is already at `.cursor/mcp.json`. Equivalent:
 
 ```json
 {
   "mcpServers": {
     "corpus-search": {
       "command": "pnpm",
-      "args": ["--dir", "C:/Users/Ulvi/Desktop/playablefactory", "mcp"],
-      "env": {
-        "DATABASE_URL": "postgresql://rag:rag@localhost:5432/rag",
-        "QDRANT_URL": "http://localhost:6333",
-        "OPENAI_API_KEY": "sk-...",
-        "BETTER_AUTH_SECRET": "same-as-dotenv",
-        "BETTER_AUTH_URL": "http://localhost:3001",
-        "CHUNK_STRATEGY": "recursive"
-      }
+      "args": ["mcp"],
+      "envFile": "${workspaceFolder}/.env"
     }
   }
 }
 ```
 
-Tool: `search({ query, topK?, strategy? })` → ranked passages JSON (includes `traceId`).  
-MCP OIDC was skipped on purpose for the timebox.
+| Tool | Args | Returns |
+|------|------|---------|
+| `search` | `query` (required), `topK?`, `strategy?` (`fixed`\|`recursive`\|`sliding`), `useRerank?`, `useHybrid?`, `hybridAlpha?` (0–1) | Ranked `passages` + `traceId`, `hybrid`, `reranked` |
+
+Tool/arg descriptions tell the LLM when to search, which strategy to pick, and to ground answers in passages.  
+Defaults for omitted flags come from API env (`HYBRID_*`, `RERANK_*`, `CHUNK_STRATEGY`).
 
 ## Chunking strategies
 
@@ -277,7 +275,9 @@ See `.env.example`. Important:
 | `OPENAI_API_KEY` | Embeddings + chat + rerank |
 | `DATABASE_URL` | Postgres |
 | `QDRANT_URL` | Vector store |
+| `QDRANT_API_KEY` | Qdrant Cloud / secured Qdrant (optional locally) |
 | `BETTER_AUTH_SECRET` | Auth signing (≥32 chars) |
+| `BETTER_AUTH_URL` / `WEB_ORIGIN` | Public site origin (prod HTTPS domain on Vercel) |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | Optional Google OAuth; both required to enable social login |
 | `CORPUS_PATH` | Documents root |
 | `CHUNK_STRATEGY` | Default strategy |
@@ -293,15 +293,82 @@ See `.env.example`. Important:
 | `CORPUS_WATCH_DEBOUNCE_MS` | Coalesce bursty FS events |
 | `CORPUS_WATCH_ALL_STRATEGIES` | Watcher re-indexes all strategies (costlier) |
 
-## Deployment guide
+## Deployment guide (Vercel Services)
 
-Not live-deployed in this deliverable. Suggested:
+Vercel **does not run `docker-compose.yml`**. Compose concepts map to [Vercel Services](https://vercel.com/docs/services) + managed state ([guide](https://vercel.com/kb/guide/docker-compose-concepts-on-vercel)). Root [`vercel.json`](vercel.json) defines the project.
 
-- **Web:** Vercel (`apps/web`) with `NEXT_PUBLIC_API_URL`
-- **API + Postgres + Qdrant:** Railway / Fly / Render from this Compose file (or managed Postgres + Qdrant Cloud)
-- Strong secrets, HTTPS cookies, lock `WEB_ORIGIN`
+| Compose | Production |
+|---------|------------|
+| `web` | Vercel Service `web` (Next.js, `apps/web`) |
+| `api` | Vercel Service `api` (container → [`docker/Dockerfile.vercel.api`](docker/Dockerfile.vercel.api)) |
+| `postgres` | **Neon** (Vercel Marketplace) — not a container |
+| `qdrant` | **Qdrant Cloud** — not a container |
+| `pgadmin` | Omit in prod |
+| `API_INTERNAL_URL=http://api:3001` | Service **binding** `API_INTERNAL_URL` → `api` |
+| Corpus volume | Baked into the API image (`data/corpus`) |
+| `CORPUS_WATCH` | Off on Vercel (stateless) |
 
-Alternatively keep the full Compose stack behind a reverse proxy (Caddy/Traefik).
+Public routing (same origin → auth cookies work):
+
+- `/api/*` → `api`
+- `/*` → `web`
+
+### 1. Create the Vercel project
+
+1. Install CLI: `npm i -g vercel` (or use Cursor **Vercel MCP**)
+2. From repo root: `vercel link`
+3. In project **Settings → Build and Deployment**, set Framework to **Services** (required when `services` is in `vercel.json`)
+4. `vercel deploy` (or connect the GitHub repo for git deploys)
+
+### 2. Managed Postgres + Qdrant
+
+1. **Neon:** Vercel Marketplace → Neon → attach to the project (`DATABASE_URL` injected), or paste a Neon connection string into Project Env
+2. **Qdrant Cloud:** create a cluster → set:
+   - `QDRANT_URL=https://xxxx.aws.cloud.qdrant.io`
+   - `QDRANT_API_KEY=...`
+3. Also set: `OPENAI_API_KEY`, `BETTER_AUTH_SECRET` (≥32 chars)
+4. Optional Google: `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`
+5. Prefer explicit prod URLs (preview URLs change):
+   - `BETTER_AUTH_URL=https://<production-domain>`
+   - `WEB_ORIGIN=https://<production-domain>`
+6. Google Cloud Console redirect URI: `https://<production-domain>/api/auth/callback/google`
+
+Dockerfile defaults: `AUTO_INGEST=false`, `CORPUS_WATCH=false`, `SEED_ON_BOOT=true`.  
+When `VERCEL=1`, the API also defaults ingest/watch off if those env vars are omitted.
+
+### 3. First-time ingest (required once)
+
+Corpus files ship inside the API image, but vectors live in Qdrant Cloud and start empty.
+
+1. Deploy, open the site, sign in as **admin** (`admin@demo.com` / seed password)
+2. Dashboard → trigger ingest for each strategy, **or** curl (with session cookie):
+
+```bash
+# after browser login, copy Cookie header
+curl -X POST "https://<production-domain>/api/admin/ingest" \
+  -H "Content-Type: application/json" \
+  -H "Cookie: better-auth.session_token=..." \
+  -d '{"strategy":"recursive"}'
+# repeat for "fixed" and "sliding" if you want all three collections
+```
+
+Or run the CLI against prod credentials from your laptop:
+
+```bash
+# .env pointed at Neon + Qdrant Cloud
+pnpm ingest:all
+```
+
+### 4. Smoke checklist
+
+- `GET /api/health` → `{ ok: true }`
+- Email login + optional Google login
+- Chat returns grounded citations
+- Admin dashboard users / ingest jobs
+
+### Local Docker (unchanged)
+
+`pnpm docker:up` still runs the full Compose stack for development. Use Vercel only for the hosted demo.
 
 ## Project layout
 
@@ -325,6 +392,7 @@ pnpm docker:down     # stop
 pnpm docker:reset    # wipe volumes + rebuild (re-seed + re-ingest)
 pnpm ingest:all      # local re-index all strategies
 pnpm mcp             # MCP stdio server
+pnpm vercel:deploy   # vercel deploy --yes (Framework=Services in dashboard)
 ```
 
 ## Sample questions (from the case)

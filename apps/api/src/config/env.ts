@@ -9,11 +9,23 @@ export const REPO_ROOT = resolve(here, "../../../../");
 config({ path: resolve(REPO_ROOT, ".env") });
 config();
 
+/** Vercel / Vercel Services inject VERCEL=1 (and often VERCEL_URL per deployment). */
+const onVercel = process.env.VERCEL === "1";
+/** Current deployment host (preview or prod). Override with BETTER_AUTH_URL / WEB_ORIGIN for custom domains. */
+const vercelPublicUrl = process.env.VERCEL_URL
+  ? `https://${process.env.VERCEL_URL}`
+  : undefined;
+
 const boolEnv = (defaultValue: boolean) =>
   z
     .enum(["true", "false"])
     .default(defaultValue ? "true" : "false")
     .transform((v) => v === "true");
+
+const optionalString = z
+  .string()
+  .optional()
+  .transform((v) => (v && v.trim() ? v.trim() : undefined));
 
 const EnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
@@ -21,19 +33,21 @@ const EnvSchema = z.object({
   LOG_LEVEL: z.string().default("info"),
   DATABASE_URL: z.string().min(1),
   QDRANT_URL: z.string().url().default("http://localhost:6333"),
+  /** Qdrant Cloud (and secured self-hosted) API key. */
+  QDRANT_API_KEY: optionalString,
   OPENAI_API_KEY: z.string().min(1),
   BETTER_AUTH_SECRET: z.string().min(32),
-  BETTER_AUTH_URL: z.string().url().default("http://localhost:3001"),
-  WEB_ORIGIN: z.string().url().default("http://localhost:3000"),
+  BETTER_AUTH_URL: z
+    .string()
+    .url()
+    .default(vercelPublicUrl ?? "http://localhost:3001"),
+  WEB_ORIGIN: z
+    .string()
+    .url()
+    .default(vercelPublicUrl ?? "http://localhost:3000"),
   /** Optional — when both set, Google social login is enabled. Empty string → unset. */
-  GOOGLE_CLIENT_ID: z
-    .string()
-    .optional()
-    .transform((v) => (v && v.trim() ? v.trim() : undefined)),
-  GOOGLE_CLIENT_SECRET: z
-    .string()
-    .optional()
-    .transform((v) => (v && v.trim() ? v.trim() : undefined)),
+  GOOGLE_CLIENT_ID: optionalString,
+  GOOGLE_CLIENT_SECRET: optionalString,
   CORPUS_PATH: z.string().default("./data/corpus"),
   CHUNK_STRATEGY: z.enum(["fixed", "recursive", "sliding"]).default("recursive"),
   EMBEDDING_MODEL: z.string().default("text-embedding-3-small"),
@@ -47,11 +61,12 @@ const EnvSchema = z.object({
   HYBRID_ALPHA: z.coerce.number().min(0).max(1).default(0.5),
   DEMO_USER_PASSWORD: z.string().default("user1234"),
   DEMO_ADMIN_PASSWORD: z.string().default("admin1234"),
-  AUTO_INGEST: boolEnv(true),
-  AUTO_INGEST_ALL_STRATEGIES: boolEnv(true),
+  /** Off by default on Vercel — cold-start ingest is too slow; run admin ingest once. */
+  AUTO_INGEST: boolEnv(!onVercel),
+  AUTO_INGEST_ALL_STRATEGIES: boolEnv(!onVercel),
   SEED_ON_BOOT: boolEnv(true),
-  /** Watch corpus folder and re-ingest incrementally on add/change/delete. */
-  CORPUS_WATCH: boolEnv(true),
+  /** Off by default on Vercel — no durable local FS to watch. */
+  CORPUS_WATCH: boolEnv(!onVercel),
   CORPUS_WATCH_ALL_STRATEGIES: boolEnv(false),
   CORPUS_WATCH_DEBOUNCE_MS: z.coerce.number().int().positive().default(2500),
 });

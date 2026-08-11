@@ -65,9 +65,17 @@ async function main() {
     ? createCorpusWatcher(container.ingestCorpus)
     : null;
 
-  app.listen(env.PORT, () => {
+  // Vercel container / Fluid injects PORT (often 80); Docker Compose uses 3001.
+  app.listen(env.PORT, "0.0.0.0", () => {
     logger.info(
-      { port: env.PORT, webOrigin: env.WEB_ORIGIN, corpusWatch: Boolean(watcher) },
+      {
+        port: env.PORT,
+        webOrigin: env.WEB_ORIGIN,
+        betterAuthUrl: env.BETTER_AUTH_URL,
+        corpusWatch: Boolean(watcher),
+        autoIngest: env.AUTO_INGEST,
+        vercel: process.env.VERCEL === "1",
+      },
       "API listening",
     );
   });

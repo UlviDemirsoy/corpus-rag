@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "corpus-search": {
+      "command": "pnpm",
+      "args": ["mcp"],
+      "envFile": "${workspaceFolder}/.env"
+    },
+    "vercel": {
+      "url": "https://mcp.vercel.com"
+    }
+  }
+}

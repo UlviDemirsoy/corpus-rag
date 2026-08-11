@@ -1,0 +1,31 @@
+# Vercel Services container for the Express API (OCI → VCR).
+# Listens on $PORT (Vercel defaults to 80). Corpus is baked in; no FS watch / boot ingest.
+FROM node:22-bookworm-slim AS base
+RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
+WORKDIR /app
+
+FROM base AS deps
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY packages/shared/package.json ./packages/shared/package.json
+COPY apps/api/package.json ./apps/api/package.json
+RUN pnpm install --filter @rag/api... --frozen-lockfile
+
+FROM base AS runner
+ENV NODE_ENV=production
+ENV PORT=80
+# Safe defaults for serverless/container (override in Vercel env if needed)
+ENV AUTO_INGEST=false
+ENV AUTO_INGEST_ALL_STRATEGIES=false
+ENV CORPUS_WATCH=false
+ENV SEED_ON_BOOT=true
+ENV CORPUS_PATH=/app/data/corpus
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
+COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY packages/shared ./packages/shared
+COPY apps/api ./apps/api
+COPY data/corpus ./data/corpus
+WORKDIR /app
+EXPOSE 80
+CMD ["pnpm", "--filter", "@rag/api", "exec", "tsx", "src/main.ts"]

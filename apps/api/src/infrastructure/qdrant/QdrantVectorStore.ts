@@ -13,8 +13,12 @@ function collectionName(strategy: ChunkStrategy): string {
 export class QdrantVectorStore implements VectorStore {
   private readonly client: QdrantClient;
 
-  constructor(url = env.QDRANT_URL) {
-    this.client = new QdrantClient({ url, checkCompatibility: false });
+  constructor(url = env.QDRANT_URL, apiKey = env.QDRANT_API_KEY) {
+    this.client = new QdrantClient({
+      url,
+      apiKey,
+      checkCompatibility: false,
+    });
   }
 
   async ensureCollection(strategy: ChunkStrategy, vectorSize: number): Promise<void> {
