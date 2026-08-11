@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, Suspense, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GoogleSignInButton } from "@/components/google-sign-in-button";
 import { getProblemMessage } from "@/lib/api-client";
-import { mcpAuthorizeContinuePath, signInEmailContinue } from "@/lib/auth";
+import { getMe, mcpAuthorizeContinuePath, signInEmailContinue } from "@/lib/auth";
 
 function LoginForm() {
   const router = useRouter();
@@ -19,6 +19,18 @@ function LoginForm() {
   const [email, setEmail] = useState("user@demo.com");
   const [password, setPassword] = useState("user1234");
   const [loading, setLoading] = useState(false);
+
+  // Already signed in + MCP authorize query → continue OAuth without re-login
+  useEffect(() => {
+    if (!oauthContinue) return;
+    let cancelled = false;
+    void getMe().then((user) => {
+      if (!cancelled && user) window.location.href = oauthContinue;
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [oauthContinue]);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
