@@ -1,6 +1,9 @@
 {
   "mcpServers": {
     "corpus-search": {
+      "url": "https://playablefactory.vercel.app/mcp"
+    },
+    "corpus-search-local": {
       "command": "pnpm",
       "args": ["mcp"],
       "envFile": "${workspaceFolder}/.env"

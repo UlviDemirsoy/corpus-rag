@@ -48,6 +48,11 @@ const EnvSchema = z.object({
   /** Optional — when both set, Google social login is enabled. Empty string → unset. */
   GOOGLE_CLIENT_ID: optionalString,
   GOOGLE_CLIENT_SECRET: optionalString,
+  /**
+   * Optional Bearer token for Streamable HTTP MCP (`/mcp`).
+   * When unset, remote MCP is open (demo). Set in production if you want a shared secret.
+   */
+  MCP_API_KEY: optionalString,
   CORPUS_PATH: z.string().default("./data/corpus"),
   CHUNK_STRATEGY: z.enum(["fixed", "recursive", "sliding"]).default("recursive"),
   EMBEDDING_MODEL: z.string().default("text-embedding-3-small"),

@@ -23,6 +23,14 @@
   },
   "rewrites": [
     {
+      "source": "/mcp",
+      "destination": { "service": "api" }
+    },
+    {
+      "source": "/mcp/(.*)",
+      "destination": { "service": "api" }
+    },
+    {
       "source": "/api/(.*)",
       "destination": { "service": "api" }
     },

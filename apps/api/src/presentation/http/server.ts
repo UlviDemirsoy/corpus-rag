@@ -4,12 +4,16 @@ import { toNodeHandler } from "better-auth/node";
 import type { Container } from "../../composition/container.js";
 import { env } from "../../config/env.js";
 import { logger } from "../../infrastructure/logging/logger.js";
+import { mountHttpMcp } from "../mcp/httpMcp.js";
 import { errorHandler, traceMiddleware } from "./middleware/errorHandler.js";
 import { createRouter } from "./routes.js";
 
 export function createHttpServer(container: Container) {
   const app = express();
 
+  // Remote MCP clients (Cursor, etc.) — permissive CORS on MCP paths only
+  app.use("/mcp", cors({ origin: true }));
+  app.use("/api/mcp", cors({ origin: true }));
   app.use(
     cors({
       origin: env.WEB_ORIGIN,
@@ -38,6 +42,9 @@ export function createHttpServer(container: Container) {
     });
     next();
   });
+
+  // Remote MCP (Streamable HTTP) — public on this API host
+  mountHttpMcp(app, container);
 
   app.use("/api", createRouter(container));
   app.use(errorHandler);

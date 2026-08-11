@@ -200,21 +200,50 @@ curl -b cookies.txt -X POST http://localhost:3001/api/chat \
 
 ## MCP server (search)
 
-Local **stdio** MCP (`corpus-search`) — same retrieval stack as `POST /api/search`.  
-**No MCP OIDC** (case out of scope): auth is “process has `.env` + DB/Qdrant access”, not browser login.  
-(Web app Google OAuth ≠ MCP OIDC; they are separate.)
+Same retrieval stack as `POST /api/search`. **No MCP OIDC** (case out of scope).
 
-```bash
-# Postgres + Qdrant must be up (Docker is fine)
-pnpm mcp
-```
+### Remote (production) — Streamable HTTP
 
-Project Cursor config is already at `.cursor/mcp.json`. Equivalent:
+Anyone can point an MCP client at the deployed API:
+
+**URL:** `https://playablefactory.vercel.app/mcp`  
+(alias: `/api/mcp`)
+
+Cursor `mcp.json`:
 
 ```json
 {
   "mcpServers": {
     "corpus-search": {
+      "url": "https://playablefactory.vercel.app/mcp"
+    }
+  }
+}
+```
+
+Optional shared secret: set `MCP_API_KEY` on the API, then:
+
+```json
+{
+  "mcpServers": {
+    "corpus-search": {
+      "url": "https://playablefactory.vercel.app/mcp",
+      "headers": { "Authorization": "Bearer YOUR_MCP_API_KEY" }
+    }
+  }
+}
+```
+
+### Local stdio (dev)
+
+```bash
+pnpm mcp
+```
+
+```json
+{
+  "mcpServers": {
+    "corpus-search-local": {
       "command": "pnpm",
       "args": ["mcp"],
       "envFile": "${workspaceFolder}/.env"
@@ -227,7 +256,6 @@ Project Cursor config is already at `.cursor/mcp.json`. Equivalent:
 |------|------|---------|
 | `search` | `query` (required), `topK?`, `strategy?` (`fixed`\|`recursive`\|`sliding`), `useRerank?`, `useHybrid?`, `hybridAlpha?` (0–1) | Ranked `passages` + `traceId`, `hybrid`, `reranked` |
 
-Tool/arg descriptions tell the LLM when to search, which strategy to pick, and to ground answers in passages.  
 Defaults for omitted flags come from API env (`HYBRID_*`, `RERANK_*`, `CHUNK_STRATEGY`).
 
 ## Chunking strategies
