@@ -23,8 +23,9 @@ If the corpus does not contain enough evidence, the system says so instead of in
 - Chat page with **SSE streaming** answers (`/api/chat/stream`): passages first, then token deltas, clickable `[n]` citations
 - Admin dashboard: documents, ingest trigger, jobs, Qdrant index health, search stats
 - Admin **Users** panel: list users, invite (email + initial password), change roles
-- MCP stdio server (`search` tool) + connect docs below
-- AuthN/Z via Better Auth: roles `user` | `admin`
+- MCP `search` tool: **remote Streamable HTTP** (`/mcp`, OAuth login) + local stdio — see [MCP server](#mcp-server-search)
+- AuthN/Z via Better Auth: roles `user` | `admin`; Google social login; MCP OAuth (same accounts)
+
 - `AI_USAGE.md`
 - `.env.example` + auto migrate/seed on API boot
 
@@ -39,9 +40,6 @@ If the corpus does not contain enough evidence, the system says so instead of in
 - Register page + role-gated dashboard
 - **Dense + BM25 hybrid (α)** + OpenAI rerank: fuse `s = α·densê + (1−α)·BM25̂` (chat UI α slider + formula), then optional rerank to `TOP_K`
 
-### Explicitly out of scope (timebox)
-- Live public deployment (guide below on how we would deploy)
-
 ## Technology stack
 
 | Layer | Tech |
@@ -49,11 +47,12 @@ If the corpus does not contain enough evidence, the system says so instead of in
 | Monorepo | pnpm workspaces |
 | Web | Next.js 15, Tailwind CSS 4, shadcn-style UI, sonner |
 | API | Express, lite clean architecture (ports & adapters) |
-| Auth | Better Auth (email/password + optional Google OAuth, httpOnly session cookies) + `role` on `user` |
-| DB | PostgreSQL + Drizzle ORM |
-| Vector DB | Qdrant (`@qdrant/js-client-rest`) |
+| Auth | Better Auth (email/password + Google OAuth, httpOnly session cookies) + `role` on `user` + MCP OAuth plugin |
+| DB | PostgreSQL + Drizzle ORM (Neon in prod) |
+| Vector DB | Qdrant (`@qdrant/js-client-rest`; Qdrant Cloud in prod) |
 | Models | OpenAI `text-embedding-3-small` + `gpt-4o-mini` |
-| MCP | `@modelcontextprotocol/sdk` (stdio) |
+| MCP | `@modelcontextprotocol/sdk` — Streamable HTTP `/mcp` (OAuth) + stdio |
+| Deploy | Vercel Services (`web` + `api` container) → https://playablefactory.vercel.app |
 | Observability | pino + `x-trace-id` / `x-request-id` |
 | Admin UIs | pgAdmin, Qdrant dashboard |
 
@@ -75,8 +74,10 @@ If the corpus does not contain enough evidence, the system says so instead of in
 Local:  Browser (:3000) ──► Web ──rewrite──► API (:3001) ──► Postgres + Qdrant + OpenAI
 Prod:   Browser ──► Vercel (web + /api→api service) ──► Neon + Qdrant Cloud + OpenAI
 
-MCP client ──stdio──► API MCP entry ──► SemanticSearch (same use case)
+MCP (remote): Cursor ──HTTPS /mcp──► API (OAuth Bearer) ──► SemanticSearch
+MCP (local):  Cursor ──stdio──► pnpm mcp ──► SemanticSearch
 ```
+
 
 Retrieval path: embed + (optional) BM25 → α-fusion → optional OpenAI rerank → slice to `TOP_K` → (chat) grounded answer.
 
@@ -199,14 +200,24 @@ curl -b cookies.txt -X POST http://localhost:3001/api/chat \
 
 ## MCP server (search)
 
-Same retrieval stack as `POST /api/search`. Remote MCP requires **login** (Better Auth MCP OAuth — Google or email/password). Cursor prompts you to sign in before `search` works.
+Same retrieval stack as `POST /api/search`. One tool: **`search`**.
 
-### Remote (production) — Streamable HTTP
+| Tool | Args | Returns |
+|------|------|---------|
+| `search` | `query` (required), `topK?` (1–20), `strategy?` (`fixed`\|`recursive`\|`sliding`), `useRerank?`, `useHybrid?`, `hybridAlpha?` (0–1) | Ranked `passages` (text, source, score, strategy) + `traceId`, `hybrid`, `reranked` |
 
-**URL:** `https://playablefactory.vercel.app/mcp`  
-(alias: `/api/mcp`)
+Defaults for omitted flags come from API env (`HYBRID_*`, `RERANK_*`, `CHUNK_STRATEGY`).
 
-Cursor `mcp.json`:
+### Remote (production) — Streamable HTTP + OAuth
+
+**Live URL:** `https://playablefactory.vercel.app/mcp` (alias `/api/mcp`)
+
+Remote MCP is **not anonymous**: Cursor must complete Better Auth MCP OAuth (Google or email/password) before `search` works. Discovery:
+
+- `https://playablefactory.vercel.app/.well-known/oauth-authorization-server`
+- `https://playablefactory.vercel.app/.well-known/oauth-protected-resource`
+
+Cursor `~/.cursor/mcp.json` (or project `.cursor/mcp.json`):
 
 ```json
 {
@@ -218,11 +229,15 @@ Cursor `mcp.json`:
 }
 ```
 
-On first connect, Cursor opens the site login (`/login`) — use **Continue with Google** or a demo account. OAuth discovery: `/.well-known/oauth-authorization-server` and `/.well-known/oauth-protected-resource`.
+1. Add the server → Cursor shows **Needs login** / Connect  
+2. Browser opens `/login` — **Continue with Google** or demo `user@demo.com` / `user1234`  
+3. Approve if consent is prompted → back to Cursor → `search` is available  
 
-Optional automation bypass (not for interactive clients): set `MCP_API_KEY` and send `Authorization: Bearer …`.
+Optional automation bypass (scripts only): set `MCP_API_KEY` on the API and send `Authorization: Bearer …`. Interactive clients should use OAuth.
 
 ### Local stdio (dev)
+
+Uses your local API env (Postgres/Qdrant/OpenAI); no remote OAuth.
 
 ```bash
 pnpm mcp
@@ -239,12 +254,6 @@ pnpm mcp
   }
 }
 ```
-
-| Tool | Args | Returns |
-|------|------|---------|
-| `search` | `query` (required), `topK?`, `strategy?` (`fixed`\|`recursive`\|`sliding`), `useRerank?`, `useHybrid?`, `hybridAlpha?` (0–1) | Ranked `passages` + `traceId`, `hybrid`, `reranked` |
-
-Defaults for omitted flags come from API env (`HYBRID_*`, `RERANK_*`, `CHUNK_STRATEGY`).
 
 ## Chunking strategies
 
