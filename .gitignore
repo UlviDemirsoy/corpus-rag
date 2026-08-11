@@ -15,4 +15,5 @@ evals/results/**
 apps/api/drizzle/meta
 *.tsbuildinfo
 .vercel
-.env*
+.env.local
+.env*.local
