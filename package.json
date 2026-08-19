@@ -16,7 +16,6 @@
     "docker:up": "docker compose -f docker/docker-compose.yml up -d --build",
     "docker:down": "docker compose -f docker/docker-compose.yml down",
     "docker:reset": "docker compose -f docker/docker-compose.yml down -v && docker compose -f docker/docker-compose.yml up -d --build",
-    "docker:logs": "docker compose -f docker/docker-compose.yml logs -f api web",
-    "vercel:deploy": "vercel deploy --yes"
+    "docker:logs": "docker compose -f docker/docker-compose.yml logs -f api web"
   }
 }

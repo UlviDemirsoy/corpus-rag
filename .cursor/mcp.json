@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "corpus-search-local": {
+    "corpus-search": {
       "command": "pnpm",
       "args": ["mcp"],
       "envFile": "${workspaceFolder}/.env"
