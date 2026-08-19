@@ -1,4 +1,4 @@
-# Corpus RAG — Case Study Deliverable
+# Corpus RAG
 
 Semantic search + grounded RAG over a document corpus, with an admin dashboard and an MCP search tool. Built as a TypeScript monorepo.
 
