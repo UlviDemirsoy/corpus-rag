@@ -4,7 +4,7 @@
   "preset": "approach",
   "run_id": "20260811T023737Z",
   "api": "http://localhost:3001",
-  "dataset": "C:\\Users\\Ulvi\\Desktop\\playablefactory\\evals\\dataset_100.yaml",
+  "dataset": "evals/dataset_100.yaml",
   "chat_model": "gpt-4o-mini",
   "embedding_model": "text-embedding-3-small",
   "top_k": 5,
@@ -194,7 +194,7 @@
       "used_ragas": true
     }
   ],
-  "csv_runs": "C:\\Users\\Ulvi\\Desktop\\playablefactory\\evals\\results\\faithfulness_runs_20260811T023737Z.csv",
-  "csv_summary": "C:\\Users\\Ulvi\\Desktop\\playablefactory\\evals\\results\\faithfulness_summary.csv",
+  "csv_runs": "evals/results/faithfulness_runs_20260811T023737Z.csv",
+  "csv_summary": "evals/results/faithfulness_summary.csv",
   "note": "Scores aggregated by approach (mean over questions). Per-question rows stay in the runs CSV for debugging."
 }

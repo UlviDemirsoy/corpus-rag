@@ -63,7 +63,7 @@ UNGROUNDED = [
         "expect_ungrounded": True,
     },
     {
-        "question": "How many paid parental leave weeks do contractors get at Playable Factory?",
+        "question": "How many paid parental leave weeks do contractors get at Lumen Playables?",
         "expect_sources": [],
         "expect_ungrounded": True,
     },

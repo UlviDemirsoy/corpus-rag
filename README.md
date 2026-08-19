@@ -2,10 +2,7 @@
 
 Semantic search + grounded RAG over a document corpus, with an admin dashboard and an MCP search tool. Built as a TypeScript monorepo.
 
-**Live site:** [https://playablefactory.vercel.app](https://playablefactory.vercel.app)  
-**MCP:** `https://playablefactory.vercel.app/mcp` (OAuth login required — see [MCP server](#mcp-server-search))
-
-Demo: `user@demo.com` / `user1234` · admin: `admin@demo.com` / `admin1234`
+After deploy, demo accounts are seeded from `DEMO_USER_PASSWORD` / `DEMO_ADMIN_PASSWORD` in `.env` (see `.env.example`).
 
 ## What this application does
 
@@ -57,7 +54,7 @@ If the corpus does not contain enough evidence, the system says so instead of in
 | Vector DB | Qdrant (`@qdrant/js-client-rest`; Qdrant Cloud in prod) |
 | Models | OpenAI `text-embedding-3-small` + `gpt-4o-mini` |
 | MCP | `@modelcontextprotocol/sdk` — Streamable HTTP `/mcp` (OAuth) + stdio |
-| Deploy | Vercel Services (`web` + `api` container) → https://playablefactory.vercel.app |
+| Deploy | Vercel Services (`web` + `api` container) — see [Deployment](#deployment-vercel-services) |
 | Observability | pino + `x-trace-id` / `x-request-id` |
 | Admin UIs | pgAdmin, Qdrant dashboard |
 
@@ -99,9 +96,9 @@ API layers: `domain` → `application` → `infrastructure` → `presentation` (
 ## Installation / run (recommended: full Docker)
 
 ```bash
-cd playablefactory
+cd corpus-rag
 cp .env.example .env
-# set OPENAI_API_KEY and BETTER_AUTH_SECRET (>=32 chars)
+# fill OPENAI_API_KEY, DATABASE_URL, BETTER_AUTH_SECRET (>=32 chars), etc.
 
 # build + start everything
 pnpm docker:up
@@ -215,12 +212,12 @@ Defaults for omitted flags come from API env (`HYBRID_*`, `RERANK_*`, `CHUNK_STR
 
 ### Remote (production) — Streamable HTTP + OAuth
 
-**Live URL:** `https://playablefactory.vercel.app/mcp` (alias `/api/mcp`)
+After Vercel deploy, MCP is at `https://<your-domain>/mcp` (alias `/api/mcp`).
 
 Remote MCP is **not anonymous**: Cursor must complete Better Auth MCP OAuth (Google or email/password) before `search` works. Discovery:
 
-- `https://playablefactory.vercel.app/.well-known/oauth-authorization-server`
-- `https://playablefactory.vercel.app/.well-known/oauth-protected-resource`
+- `https://<your-domain>/.well-known/oauth-authorization-server`
+- `https://<your-domain>/.well-known/oauth-protected-resource`
 
 Cursor `~/.cursor/mcp.json` (or project `.cursor/mcp.json`):
 
@@ -228,14 +225,14 @@ Cursor `~/.cursor/mcp.json` (or project `.cursor/mcp.json`):
 {
   "mcpServers": {
     "corpus-search": {
-      "url": "https://playablefactory.vercel.app/mcp"
+      "url": "https://<your-domain>/mcp"
     }
   }
 }
 ```
 
 1. Add the server → Cursor shows **Needs login** / Connect  
-2. Browser opens `/login` — **Continue with Google** or demo `user@demo.com` / `user1234`  
+2. Browser opens `/login` — **Continue with Google** or your seeded demo account  
 3. Approve if consent is prompted → back to Cursor → `search` is available  
 
 Optional automation bypass (scripts only): set `MCP_API_KEY` on the API and send `Authorization: Bearer …`. Interactive clients should use OAuth.

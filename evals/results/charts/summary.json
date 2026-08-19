@@ -1,12 +1,12 @@
 {
-  "source_csv": "C:\\Users\\Ulvi\\Desktop\\playablefactory\\evals\\results\\faithfulness_runs_20260811T023737Z.csv",
+  "source_csv": "evals/results/faithfulness_runs_20260811T023737Z.csv",
   "unit": "approach",
   "chat_model": "gpt-4o-mini",
   "embedding_model": "text-embedding-3-small",
   "n_approaches": 12,
   "n_questions_per_approach": 20,
-  "chart": "C:\\Users\\Ulvi\\Desktop\\playablefactory\\evals\\results\\charts\\faithfulness_by_setting.png",
-  "heatmap": "C:\\Users\\Ulvi\\Desktop\\playablefactory\\evals\\results\\charts\\faithfulness_by_approach_heatmap.png",
+  "chart": "evals/results/charts/faithfulness_by_setting.png",
+  "heatmap": "evals/results/charts/faithfulness_by_approach_heatmap.png",
   "rows": [
     {
       "setting": "fixed_hyb0_rr0",

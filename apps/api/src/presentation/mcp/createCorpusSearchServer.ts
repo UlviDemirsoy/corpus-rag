@@ -6,7 +6,7 @@ import { httpContext } from "../../infrastructure/context/httpContext.js";
 import { logger } from "../../infrastructure/logging/logger.js";
 
 export const SEARCH_TOOL_DESCRIPTION = [
-  "Search the Playable Factory RAG corpus (mobile playable-ad docs: AppLovin, Unity Ads, IronSource, size limits, HTML5 packaging, store policies).",
+  "Search the RAG corpus (mobile playable-ad docs: AppLovin, Unity Ads, IronSource, size limits, HTML5 packaging, store policies).",
   "Use this when the user asks a factual question that may be answered from those docs.",
   "Returns ranked passages with text, source path, score, and strategy — ground your answer in those passages; if evidence is weak or missing, say so.",
   "Defaults (when omitted): strategy=recursive, topK from server env, hybrid/rerank from server env.",

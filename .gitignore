@@ -17,5 +17,6 @@ apps/api/drizzle/meta/*
 !apps/api/drizzle/meta/_journal.json
 *.tsbuildinfo
 .vercel
+.env
 .env.local
 .env*.local
